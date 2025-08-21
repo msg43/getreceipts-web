@@ -1,0 +1,51 @@
+{
+  "functions": {
+    "src/app/api/receipts/route.ts": {
+      "maxDuration": 30
+    },
+    "src/app/api/badge/[slug]/route.ts": {
+      "maxDuration": 10
+    },
+    "src/app/api/claims/[slug]/route.ts": {
+      "maxDuration": 10
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
+    },
+    {
+      "source": "/embed/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "ALLOWALL"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/badge/:slug",
+      "destination": "/api/badge/:slug"
+    }
+  ],
+  "regions": ["iad1"],
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install"
+}

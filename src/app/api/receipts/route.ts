@@ -3,9 +3,28 @@ import { db } from "@/lib/db";
 import { claims, sources, positions, aggregates } from "@/db/schema";
 import { ReceiptSchema } from "@/lib/rf1";
 import { nanoid } from "nanoid";
+import { apiLimiter, getClientIP } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
   try {
+    // Rate limiting
+    const ip = getClientIP(req);
+    const rateLimitResult = apiLimiter.check(10, ip); // 10 requests per minute per IP
+    
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: "Too many requests", retryAfter: Math.round((rateLimitResult.reset - Date.now()) / 1000) },
+        { 
+          status: 429,
+          headers: {
+            "X-RateLimit-Limit": rateLimitResult.limit.toString(),
+            "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
+            "X-RateLimit-Reset": rateLimitResult.reset.toString(),
+          }
+        }
+      );
+    }
+
     const body = await req.json();
     const parsed = ReceiptSchema.safeParse(body);
     if (!parsed.success) {

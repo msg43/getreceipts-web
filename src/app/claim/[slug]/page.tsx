@@ -3,12 +3,61 @@ import { claims, aggregates, modelReviews, sources, positions } from "@/db/schem
 import { eq } from "drizzle-orm";
 import Link from "next/link";
 import Image from "next/image";
+import { Metadata } from "next";
 
 type Claim = typeof claims.$inferSelect;
 type Aggregate = typeof aggregates.$inferSelect;
 type ModelReview = typeof modelReviews.$inferSelect;
 type Source = typeof sources.$inferSelect;
 type Position = typeof positions.$inferSelect;
+
+// Generate metadata for SEO and social sharing
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const [c] = await db.select().from(claims).where(eq(claims.slug, slug));
+  
+  if (!c) {
+    return {
+      title: 'Claim Not Found - GetReceipts.org',
+      description: 'The requested claim could not be found.',
+    };
+  }
+
+  const [agg] = await db.select().from(aggregates).where(eq(aggregates.claimId, c.id));
+  const consensusPercentage = Math.round(Number(agg?.consensusScore ?? 0.5) * 100);
+  const badgeUrl = `https://getreceipts.org/api/badge/${slug}`;
+  const claimUrl = `https://getreceipts.org/claim/${slug}`;
+
+  return {
+    title: `${c.textShort} - GetReceipts.org`,
+    description: `Claim with ${consensusPercentage}% consensus. View evidence, sources, and positions.`,
+    openGraph: {
+      title: c.textShort,
+      description: `${consensusPercentage}% consensus • View evidence and sources`,
+      url: claimUrl,
+      siteName: 'GetReceipts.org',
+      images: [
+        {
+          url: badgeUrl,
+          width: 420,
+          height: 42,
+          alt: `Consensus badge showing ${consensusPercentage}%`,
+        },
+      ],
+      type: 'article',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: c.textShort,
+      description: `${consensusPercentage}% consensus • View evidence and sources`,
+      images: [badgeUrl],
+    },
+    other: {
+      'article:author': c.createdBy || 'GetReceipts.org',
+      'article:published_time': c.createdAt?.toISOString() || new Date().toISOString(),
+    },
+  };
+}
 
 function buildSnippet(c: Claim, agg: Aggregate | undefined){
   const pct = Math.round(Number(agg?.consensusScore ?? 0.5)*100);
@@ -25,8 +74,42 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
   const srcs = await db.select().from(sources).where(eq(sources.claimId, c.id));
   const pos = await db.select().from(positions).where(eq(positions.claimId, c.id));
 
+  // Generate JSON-LD structured data
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ClaimReview",
+    "url": `https://getreceipts.org/claim/${slug}`,
+    "claimReviewed": c.textShort,
+    "author": {
+      "@type": "Organization",
+      "name": "GetReceipts.org",
+      "url": "https://getreceipts.org"
+    },
+    "datePublished": c.createdAt?.toISOString() || new Date().toISOString(),
+    "reviewRating": {
+      "@type": "Rating",
+      "ratingValue": Number(agg?.consensusScore ?? 0.5),
+      "bestRating": 1,
+      "worstRating": 0,
+      "ratingExplanation": `Consensus score based on ${srcs.length} sources and ${pos.length} positions`
+    },
+    "itemReviewed": {
+      "@type": "Claim",
+      "text": c.textShort,
+      "author": {
+        "@type": "Person",
+        "name": c.createdBy || "Unknown"
+      }
+    }
+  };
+
   return (
-    <div className="mx-auto max-w-3xl p-6 space-y-6">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className="mx-auto max-w-3xl p-6 space-y-6">
       <div className="p-6 border rounded-lg space-y-4">
         <h1 className="text-2xl font-semibold">{c.textShort}</h1>
         <div className="flex items-center gap-4">
@@ -62,5 +145,6 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
         </div>
       </div>
     </div>
+    </>
   );
 }

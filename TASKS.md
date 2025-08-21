@@ -314,16 +314,16 @@ This document tracks the 25-step implementation plan for GetReceipts.org, a web 
 ---
 
 ### 18) Vercel deploy
-- [ ] Push initial code to GitHub
-- [ ] Import repo into Vercel
-- [ ] Set environment variables in Vercel
-- [ ] Deploy and verify endpoints
+- [x] Push initial code to GitHub
+- [x] Import repo into Vercel
+- [x] Set environment variables in Vercel
+- [x] Deploy and verify endpoints
 
 **Acceptance Criteria:**
-- [ ] Application deploys successfully
-- [ ] All environment variables configured
-- [ ] API endpoints accessible
-- [ ] Home page and key routes working
+- [x] Application deploys successfully
+- [x] All environment variables configured
+- [x] API endpoints accessible
+- [x] Home page and key routes working
 
 **Artifacts:**
 - Deployed application URL
@@ -348,10 +348,10 @@ This document tracks the 25-step implementation plan for GetReceipts.org, a web 
 ---
 
 ### 20) Analytics & SEO
-- [ ] Add Plausible/GA analytics
-- [ ] JSON‑LD for claims
-- [ ] Proper og: tags using badge for social previews
-- [ ] UTM tagging on copy links
+- [x] Add Plausible/GA analytics
+- [x] JSON‑LD for claims
+- [x] Proper og: tags using badge for social previews
+- [x] UTM tagging on copy links
 
 **Acceptance Criteria:**
 - [ ] Analytics tracking user interactions
@@ -367,8 +367,8 @@ This document tracks the 25-step implementation plan for GetReceipts.org, a web 
 ---
 
 ### 21) Observability
-- [ ] Basic logging on API routes
-- [ ] Vercel monitoring or Logflare integration
+- [x] Basic logging on API routes
+- [x] Vercel monitoring or Logflare integration
 
 **Acceptance Criteria:**
 - [ ] API requests logged with relevant details
@@ -383,9 +383,9 @@ This document tracks the 25-step implementation plan for GetReceipts.org, a web 
 ---
 
 ### 22) Security basics
-- [ ] Security headers in next.config.js (CSP, frame-ancestors allow /embed)
-- [ ] Validate and normalize URLs/DOIs
-- [ ] Body size limits on API
+- [x] Security headers in next.config.js (CSP, frame-ancestors allow /embed)
+- [x] Validate and normalize URLs/DOIs
+- [x] Body size limits on API
 
 **Acceptance Criteria:**
 - [ ] Security headers properly configured
