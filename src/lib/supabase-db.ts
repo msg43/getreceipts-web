@@ -7,13 +7,18 @@ export const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 // Helper functions for database operations
 export async function getClaimBySlug(slug: string) {
+  console.log('Fetching claim by slug:', slug)
   const { data, error } = await supabase
     .from('claims')
     .select('*')
     .eq('slug', slug)
     .single()
   
-  if (error) throw error
+  console.log('Supabase response:', { data, error })
+  if (error) {
+    console.error('Supabase error:', error)
+    throw error
+  }
   return data
 }
 
