@@ -19,15 +19,19 @@ export async function GET() {
       firstClaim: result[0] || null
     });
   } catch (error: unknown) {
-    const err = error as any;
     console.error('Database connection failed:', error);
+    
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorDetails = error && typeof error === 'object' ? {
+      code: (error as { code?: string }).code,
+      severity: (error as { severity?: string }).severity,
+      detail: (error as { detail?: string }).detail
+    } : {};
     
     return Response.json({ 
       success: false, 
-      error: err.message,
-      code: err.code,
-      severity: err.severity,
-      detail: err.detail
+      error: errorMessage,
+      ...errorDetails
     }, { status: 500 });
   }
 }
