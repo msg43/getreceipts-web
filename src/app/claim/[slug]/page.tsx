@@ -1,30 +1,12 @@
 import { getClaimBySlug, getAggregateByClaimId, getModelReviewsByClaimId, getSourcesByClaimId, getPositionsByClaimId } from "@/lib/supabase-db";
-import Link from "next/link";
 import Image from "next/image";
 import { Metadata } from "next";
+import ClaimActions from "@/components/ClaimActions";
 
 // Force Node.js runtime for database operations
 export const runtime = 'nodejs';
 
-// Database types for Supabase
-type Claim = {
-  id: string;
-  slug: string;
-  text_short: string;
-  text_long?: string;
-  topics?: string[];
-  created_by?: string;
-  created_at?: string;
-};
-
-type Aggregate = {
-  claim_id: string;
-  consensus_score?: number;
-  support_count?: number;
-  dispute_count?: number;
-  support_weight?: number;
-  dispute_weight?: number;
-};
+// Database types for Supabase (simplified for this component)
 
 type ModelReview = {
   id: string;
@@ -106,11 +88,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-function buildSnippet(c: Claim, agg: Aggregate | undefined){
-  const pct = Math.round(Number(agg?.consensus_score ?? 0.5)*100);
-  const url = `${process.env.NEXT_PUBLIC_SITE_URL}/claim/${c.slug}`;
-  return `🧾 ${c.text_short}\n🌡️ Consensus: ${pct}%\n🔗 ${url}`;
-}
+
 
 export default async function ClaimPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -166,14 +144,7 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
               <option key={r.id}>{r.model} • {Math.round(Number(r.score)*100)}%</option>
             )) : <option>Waiting for reviews…</option>}
           </select>
-          <div className="ml-auto flex gap-3">
-            <button className="underline" onClick={async () => {
-              const text = buildSnippet(c, agg);
-              await navigator.clipboard.writeText(text);
-              alert("Snippet copied!");
-            }}>Copy Snippet</button>
-            <Link className="underline" href={`/embed/${slug}`} target="_blank">Open Embed</Link>
-          </div>
+          <ClaimActions claim={c} aggregate={agg} slug={slug} />
         </div>
       </div>
 
