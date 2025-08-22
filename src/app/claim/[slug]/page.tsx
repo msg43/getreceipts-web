@@ -1,7 +1,16 @@
-import { getClaimBySlug, getAggregateByClaimId, getModelReviewsByClaimId, getSourcesByClaimId, getPositionsByClaimId } from "@/lib/supabase-db";
+import { 
+  getClaimBySlug, getAggregateByClaimId, getModelReviewsByClaimId, 
+  getSourcesByClaimId, getPositionsByClaimId, getKnowledgePeopleByClaimId,
+  getKnowledgeJargonByClaimId, getKnowledgeModelsByClaimId, 
+  getClaimRelationshipsByClaimId, getVotesByClaimId, getCommentsByClaimId
+} from "@/lib/supabase-db";
 import Image from "next/image";
 import { Metadata } from "next";
 import ClaimActions from "@/components/ClaimActions";
+import KnowledgeArtifacts from "@/components/KnowledgeArtifacts";
+import ClaimGraph from "@/components/ClaimGraph";
+import VotingWidget from "@/components/VotingWidget";
+import CommentsSection from "@/components/CommentsSection";
 
 // Force Node.js runtime for database operations
 export const runtime = 'nodejs';
@@ -94,10 +103,20 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
   const { slug } = await params;
   const c = await getClaimBySlug(slug).catch(() => null);
   if (!c) return <div className="p-8">Not found</div>;
-  const agg = await getAggregateByClaimId(c.id).catch(() => null);
-  const reviews = await getModelReviewsByClaimId(c.id);
-  const srcs = await getSourcesByClaimId(c.id);
-  const pos = await getPositionsByClaimId(c.id);
+  
+  // Fetch all data in parallel for better performance
+  const [agg, reviews, srcs, pos, people, jargon, models, relationships, votes, comments] = await Promise.all([
+    getAggregateByClaimId(c.id).catch(() => null),
+    getModelReviewsByClaimId(c.id),
+    getSourcesByClaimId(c.id),
+    getPositionsByClaimId(c.id),
+    getKnowledgePeopleByClaimId(c.id),
+    getKnowledgeJargonByClaimId(c.id),
+    getKnowledgeModelsByClaimId(c.id),
+    getClaimRelationshipsByClaimId(c.id),
+    getVotesByClaimId(c.id),
+    getCommentsByClaimId(c.id)
+  ]);
 
   // Generate JSON-LD structured data
   const jsonLd = {
@@ -134,35 +153,117 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="mx-auto max-w-3xl p-6 space-y-6">
-      <div className="p-6 border rounded-lg space-y-4">
-        <h1 className="text-2xl font-semibold">{c.text_short}</h1>
-        <div className="flex items-center gap-4">
-          <Image alt="Consensus badge" src={`/api/badge/${slug}`} width={420} height={42} className="h-8" />
-          <select className="border rounded px-2 py-1">
-            {reviews.length ? reviews.map((r: ModelReview) => (
-              <option key={r.id}>{r.model} • {Math.round(Number(r.score)*100)}%</option>
-            )) : <option>Waiting for reviews…</option>}
-          </select>
-          <ClaimActions claim={c} aggregate={agg} slug={slug} />
+      <div className="mx-auto max-w-6xl p-6 space-y-8">
+        {/* Main Claim Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <div className="p-6 border rounded-lg space-y-4">
+              <h1 className="text-2xl font-semibold">{c.text_short}</h1>
+              <div className="flex items-center gap-4">
+                <Image alt="Consensus badge" src={`/api/badge/${slug}`} width={420} height={42} className="h-8" />
+                <select className="border rounded px-2 py-1">
+                  {reviews.length ? reviews.map((r: ModelReview) => (
+                    <option key={r.id}>{r.model} • {Math.round(Number(r.score)*100)}%</option>
+                  )) : <option>Waiting for reviews…</option>}
+                </select>
+                <ClaimActions claim={c} aggregate={agg} slug={slug} />
+              </div>
+              {c.text_long && (
+                <div className="mt-4 pt-4 border-t">
+                  <h3 className="font-medium mb-2">Detailed Analysis</h3>
+                  <p className="text-gray-700">{c.text_long}</p>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          {/* Voting Widget */}
+          <div className="lg:col-span-1">
+            <VotingWidget 
+              claimId={c.id} 
+              initialVotes={votes}
+              disabled={false}
+            />
+          </div>
         </div>
-      </div>
 
-      <div className="p-6 border rounded-lg">
-        <h2 className="font-medium mb-3">Evidence</h2>
-        <ul className="list-disc pl-5 space-y-1">
-          {srcs.map((s: Source) => <li key={s.id}><a className="underline" target="_blank" href={s.url ?? "#"} rel="noopener noreferrer">{s.title ?? s.url}</a></li>)}
-        </ul>
-      </div>
+        {/* Knowledge Artifacts from Knowledge_Chipper */}
+        {(people.length > 0 || jargon.length > 0 || models.length > 0) && (
+          <KnowledgeArtifacts 
+            people={people} 
+            jargon={jargon} 
+            models={models} 
+          />
+        )}
 
-      <div className="p-6 border rounded-lg">
-        <h2 className="font-medium mb-3">Positions</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <div><h3 className="mb-2">Support</h3>{pos.filter((p: Position)=>p.stance==="support").map((p: Position)=> <div key={p.id}>• {p.quote ?? "Supporter"}</div>)}</div>
-          <div><h3 className="mb-2">Dispute</h3>{pos.filter((p: Position)=>p.stance==="oppose").map((p: Position)=> <div key={p.id}>• {p.quote ?? "Opponent"}</div>)}</div>
+        {/* Evidence and Positions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="p-6 border rounded-lg">
+            <h2 className="font-medium mb-3">Evidence</h2>
+            <ul className="list-disc pl-5 space-y-1">
+              {srcs.map((s: Source) => (
+                <li key={s.id}>
+                  <a className="underline" target="_blank" href={s.url ?? "#"} rel="noopener noreferrer">
+                    {s.title ?? s.url}
+                  </a>
+                  {s.type && <span className="ml-2 text-xs text-gray-500">({s.type})</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="p-6 border rounded-lg">
+            <h2 className="font-medium mb-3">Positions</h2>
+            <div className="space-y-4">
+              <div>
+                <h3 className="mb-2 text-green-600 font-medium">Support ({pos.filter((p: Position)=>p.stance==="support").length})</h3>
+                {pos.filter((p: Position)=>p.stance==="support").map((p: Position)=> (
+                  <div key={p.id} className="text-sm">• {p.quote ?? "Supporter"}</div>
+                ))}
+              </div>
+              <div>
+                <h3 className="mb-2 text-red-600 font-medium">Dispute ({pos.filter((p: Position)=>p.stance==="oppose").length})</h3>
+                {pos.filter((p: Position)=>p.stance==="oppose").map((p: Position)=> (
+                  <div key={p.id} className="text-sm">• {p.quote ?? "Opponent"}</div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
+
+        {/* Claims Network Graph */}
+        <ClaimGraph claimId={c.id} height={500} />
+
+        {/* Related Claims */}
+        {relationships.length > 0 && (
+          <div className="p-6 border rounded-lg">
+            <h2 className="font-medium mb-3">Related Claims</h2>
+            <div className="space-y-2">
+              {relationships.map((rel: any) => (
+                <div key={rel.id} className="flex items-center gap-2 p-2 border rounded">
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    rel.relationship_type === 'supports' ? 'bg-green-100 text-green-800' :
+                    rel.relationship_type === 'contradicts' ? 'bg-red-100 text-red-800' :
+                    rel.relationship_type === 'extends' ? 'bg-blue-100 text-blue-800' :
+                    'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {rel.relationship_type}
+                  </span>
+                  <a href={`/claim/${rel.to_claim?.slug}`} className="text-blue-600 hover:underline flex-1">
+                    {rel.to_claim?.text_short || 'Related claim'}
+                  </a>
+                  <span className="text-xs text-gray-500">
+                    {Math.round(Number(rel.strength || 0.5) * 100)}% confidence
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Comments Section */}
+        <CommentsSection claimId={c.id} initialComments={comments} />
       </div>
-    </div>
     </>
   );
 }
