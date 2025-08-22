@@ -1,6 +1,4 @@
-import { db } from "@/lib/db";
-import { claims, aggregates, modelReviews, sources, positions } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { getClaimBySlug, getAggregateByClaimId, getModelReviewsByClaimId, getSourcesByClaimId, getPositionsByClaimId } from "@/lib/supabase-db";
 import Link from "next/link";
 import Image from "next/image";
 import { Metadata } from "next";
@@ -8,16 +6,62 @@ import { Metadata } from "next";
 // Force Node.js runtime for database operations
 export const runtime = 'nodejs';
 
-type Claim = typeof claims.$inferSelect;
-type Aggregate = typeof aggregates.$inferSelect;
-type ModelReview = typeof modelReviews.$inferSelect;
-type Source = typeof sources.$inferSelect;
-type Position = typeof positions.$inferSelect;
+// Database types for Supabase
+type Claim = {
+  id: string;
+  slug: string;
+  text_short: string;
+  text_long?: string;
+  topics?: string[];
+  created_by?: string;
+  created_at?: string;
+};
+
+type Aggregate = {
+  claim_id: string;
+  consensus_score?: number;
+  support_count?: number;
+  dispute_count?: number;
+  support_weight?: number;
+  dispute_weight?: number;
+};
+
+type ModelReview = {
+  id: string;
+  claim_id?: string;
+  model: string;
+  score: number;
+  rationale?: string;
+  version?: string;
+  reviewed_at?: string;
+};
+
+type Source = {
+  id: string;
+  claim_id: string;
+  type: string;
+  title?: string;
+  url?: string;
+  doi?: string;
+  venue?: string;
+  date?: string;
+  cred_score?: number;
+  meta?: any;
+};
+
+type Position = {
+  id: string;
+  claim_id?: string;
+  actor_id?: string;
+  stance: string;
+  quote?: string;
+  link?: string;
+};
 
 // Generate metadata for SEO and social sharing
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const [c] = await db.select().from(claims).where(eq(claims.slug, slug));
+  const c = await getClaimBySlug(slug).catch(() => null);
   
   if (!c) {
     return {
@@ -26,16 +70,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     };
   }
 
-  const [agg] = await db.select().from(aggregates).where(eq(aggregates.claimId, c.id));
-  const consensusPercentage = Math.round(Number(agg?.consensusScore ?? 0.5) * 100);
+  const agg = await getAggregateByClaimId(c.id).catch(() => null);
+  const consensusPercentage = Math.round(Number(agg?.consensus_score ?? 0.5) * 100);
   const badgeUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/badge/${slug}`;
   const claimUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/claim/${slug}`;
 
   return {
-    title: `${c.textShort} - GetReceipts.org`,
+    title: `${c.text_short} - GetReceipts.org`,
     description: `Claim with ${consensusPercentage}% consensus. View evidence, sources, and positions.`,
     openGraph: {
-      title: c.textShort,
+      title: c.text_short,
       description: `${consensusPercentage}% consensus • View evidence and sources`,
       url: claimUrl,
       siteName: 'GetReceipts.org',
@@ -51,57 +95,57 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     },
     twitter: {
       card: 'summary_large_image',
-      title: c.textShort,
+      title: c.text_short,
       description: `${consensusPercentage}% consensus • View evidence and sources`,
       images: [badgeUrl],
     },
     other: {
-      'article:author': c.createdBy || 'GetReceipts.org',
-      'article:published_time': c.createdAt ? new Date(c.createdAt).toISOString() : new Date().toISOString(),
+      'article:author': c.created_by || 'GetReceipts.org',
+      'article:published_time': c.created_at ? new Date(c.created_at).toISOString() : new Date().toISOString(),
     },
   };
 }
 
 function buildSnippet(c: Claim, agg: Aggregate | undefined){
-  const pct = Math.round(Number(agg?.consensusScore ?? 0.5)*100);
+  const pct = Math.round(Number(agg?.consensus_score ?? 0.5)*100);
   const url = `${process.env.NEXT_PUBLIC_SITE_URL}/claim/${c.slug}`;
-  return `🧾 ${c.textShort}\n🌡️ Consensus: ${pct}%\n🔗 ${url}`;
+  return `🧾 ${c.text_short}\n🌡️ Consensus: ${pct}%\n🔗 ${url}`;
 }
 
 export default async function ClaimPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [c] = await db.select().from(claims).where(eq(claims.slug, slug));
+  const c = await getClaimBySlug(slug).catch(() => null);
   if (!c) return <div className="p-8">Not found</div>;
-  const [agg] = await db.select().from(aggregates).where(eq(aggregates.claimId, c.id));
-  const reviews = await db.select().from(modelReviews).where(eq(modelReviews.claimId, c.id));
-  const srcs = await db.select().from(sources).where(eq(sources.claimId, c.id));
-  const pos = await db.select().from(positions).where(eq(positions.claimId, c.id));
+  const agg = await getAggregateByClaimId(c.id).catch(() => null);
+  const reviews = await getModelReviewsByClaimId(c.id);
+  const srcs = await getSourcesByClaimId(c.id);
+  const pos = await getPositionsByClaimId(c.id);
 
   // Generate JSON-LD structured data
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ClaimReview",
     "url": `https://getreceipts.org/claim/${slug}`,
-    "claimReviewed": c.textShort,
+    "claimReviewed": c.text_short,
     "author": {
       "@type": "Organization",
       "name": "GetReceipts.org",
       "url": "https://getreceipts.org"
     },
-    "datePublished": c.createdAt ? new Date(c.createdAt).toISOString() : new Date().toISOString(),
+    "datePublished": c.created_at ? new Date(c.created_at).toISOString() : new Date().toISOString(),
     "reviewRating": {
       "@type": "Rating",
-      "ratingValue": Number(agg?.consensusScore ?? 0.5),
+      "ratingValue": Number(agg?.consensus_score ?? 0.5),
       "bestRating": 1,
       "worstRating": 0,
       "ratingExplanation": `Consensus score based on ${srcs.length} sources and ${pos.length} positions`
     },
     "itemReviewed": {
       "@type": "Claim",
-      "text": c.textShort,
+      "text": c.text_short,
       "author": {
         "@type": "Person",
-        "name": c.createdBy || "Unknown"
+        "name": c.created_by || "Unknown"
       }
     }
   };
@@ -114,7 +158,7 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
       />
       <div className="mx-auto max-w-3xl p-6 space-y-6">
       <div className="p-6 border rounded-lg space-y-4">
-        <h1 className="text-2xl font-semibold">{c.textShort}</h1>
+        <h1 className="text-2xl font-semibold">{c.text_short}</h1>
         <div className="flex items-center gap-4">
           <Image alt="Consensus badge" src={`/api/badge/${slug}`} width={420} height={42} className="h-8" />
           <select className="border rounded px-2 py-1">
