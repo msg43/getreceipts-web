@@ -25,8 +25,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   const [agg] = await db.select().from(aggregates).where(eq(aggregates.claimId, c.id));
   const consensusPercentage = Math.round(Number(agg?.consensusScore ?? 0.5) * 100);
-  const badgeUrl = `https://getreceipts.org/api/badge/${slug}`;
-  const claimUrl = `https://getreceipts.org/claim/${slug}`;
+  const badgeUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/badge/${slug}`;
+  const claimUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/claim/${slug}`;
 
   return {
     title: `${c.textShort} - GetReceipts.org`,
