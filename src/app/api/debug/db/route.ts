@@ -18,15 +18,16 @@ export async function GET() {
       claimsCount: result.length,
       firstClaim: result[0] || null
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as any;
     console.error('Database connection failed:', error);
     
     return Response.json({ 
       success: false, 
-      error: error.message,
-      code: error.code,
-      severity: error.severity,
-      detail: error.detail
+      error: err.message,
+      code: err.code,
+      severity: err.severity,
+      detail: err.detail
     }, { status: 500 });
   }
 }
