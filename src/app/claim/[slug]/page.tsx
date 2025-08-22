@@ -46,7 +46,7 @@ type Source = {
   venue?: string;
   date?: string;
   cred_score?: number;
-  meta?: any;
+  meta?: Record<string, unknown>;
 };
 
 type Position = {
