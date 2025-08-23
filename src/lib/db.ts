@@ -5,13 +5,13 @@ import postgres from 'postgres';
 console.log('🔧 Trying Supabase connection...');
 
 // Try using Supabase client connection
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder_key';
 
 export const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // Also keep the postgres connection as fallback
-const connectionString = process.env.DATABASE_URL!;
+const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/placeholder';
 console.log('Database connection attempt:', connectionString.replace(/:[^@]*@/, ':***@'));
 
 export const sql = postgres(connectionString, { 
