@@ -23,7 +23,9 @@ type Aggregate = {
 
 function buildSnippet(c: Claim, agg: Aggregate | undefined) {
   const pct = Math.round(Number(agg?.consensus_score ?? 0.5) * 100);
-  const url = `${process.env.NEXT_PUBLIC_SITE_URL}/claim/${c.slug}`;
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
+                  (typeof window !== 'undefined' ? window.location.origin : 'https://getreceipts-web.vercel.app');
+  const url = `${baseUrl}/claim/${c.slug}`;
   return `🧾 ${c.text_short}\n🌡️ Consensus: ${pct}%\n🔗 ${url}`;
 }
 
@@ -35,9 +37,32 @@ interface ClaimActionsProps {
 
 export default function ClaimActions({ claim, aggregate, slug }: ClaimActionsProps) {
   const handleCopySnippet = async () => {
-    const text = buildSnippet(claim, aggregate);
-    await navigator.clipboard.writeText(text);
-    alert("Snippet copied!");
+    try {
+      const text = buildSnippet(claim, aggregate);
+      
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        alert("Snippet copied!");
+      } else {
+        // Fallback for non-HTTPS environments
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          alert("Snippet copied!");
+        } catch (err) {
+          console.error('Fallback copy failed:', err);
+          alert("Copy failed. Please copy manually: " + text);
+        }
+        document.body.removeChild(textArea);
+      }
+    } catch (error) {
+      console.error('Copy failed:', error);
+      alert("Copy failed. Please try again.");
+    }
   };
 
   return (

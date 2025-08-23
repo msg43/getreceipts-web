@@ -1,46 +1,55 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { claims, claimRelationships, aggregates } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { supabase } from "@/lib/db";
 
 export async function GET() {
   try {
-    // Get all claims with their consensus scores
-    const claimsWithScores = await db.select({
-      id: claims.id,
-      slug: claims.slug,
-      text: claims.textShort,
-      topics: claims.topics,
-      consensus: aggregates.consensusScore
-    })
-    .from(claims)
-    .leftJoin(aggregates, eq(aggregates.claimId, claims.id))
-    .limit(100); // Limit for performance
+    // Get all claims with their consensus scores using Supabase
+    const { data: claimsData, error: claimsError } = await supabase
+      .from('claims')
+      .select(`
+        id,
+        slug,
+        text_short,
+        topics,
+        aggregates(consensus_score)
+      `)
+      .limit(100);
     
-    // Get all relationships
-    const relationships = await db.select({
-      fromClaimId: claimRelationships.fromClaimId,
-      toClaimId: claimRelationships.toClaimId,
-      type: claimRelationships.relationshipType,
-      strength: claimRelationships.strength,
-      evidence: claimRelationships.evidence
-    })
-    .from(claimRelationships);
+    if (claimsError) {
+      console.error('Error fetching claims:', claimsError);
+      throw claimsError;
+    }
+    
+    // Get all relationships using Supabase
+    const { data: relationshipsData, error: relationshipsError } = await supabase
+      .from('claim_relationships')
+      .select(`
+        from_claim_id,
+        to_claim_id,
+        relationship_type,
+        strength,
+        evidence
+      `);
+    
+    if (relationshipsError) {
+      console.error('Error fetching relationships:', relationshipsError);
+      throw relationshipsError;
+    }
     
     // Format for D3.js visualization
-    const nodes = claimsWithScores.map(claim => ({
+    const nodes = (claimsData || []).map(claim => ({
       id: claim.id,
       slug: claim.slug,
-      text: claim.text || "",
+      text: claim.text_short || "",
       topics: claim.topics || [],
-      consensus: Number(claim.consensus || 0.5),
-      size: 20 + (Number(claim.consensus || 0.5) * 20) // Size based on consensus
+      consensus: Number(claim.aggregates?.[0]?.consensus_score || 0.5),
+      size: 20 + (Number(claim.aggregates?.[0]?.consensus_score || 0.5) * 20) // Size based on consensus
     }));
     
-    const links = relationships.map(rel => ({
-      source: rel.fromClaimId,
-      target: rel.toClaimId,
-      type: rel.type,
+    const links = (relationshipsData || []).map(rel => ({
+      source: rel.from_claim_id,
+      target: rel.to_claim_id,
+      type: rel.relationship_type,
       strength: Number(rel.strength || 0.5),
       evidence: rel.evidence
     }));

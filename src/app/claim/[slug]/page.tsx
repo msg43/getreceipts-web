@@ -11,6 +11,7 @@ import KnowledgeArtifacts from "@/components/KnowledgeArtifacts";
 import ClaimGraph from "@/components/ClaimGraph";
 import VotingWidget from "@/components/VotingWidget";
 import CommentsSection from "@/components/CommentsSection";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 // Force Node.js runtime for database operations
 export const runtime = 'nodejs';
@@ -63,8 +64,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   const agg = await getAggregateByClaimId(c.id).catch(() => null);
   const consensusPercentage = Math.round(Number(agg?.consensus_score ?? 0.5) * 100);
-  const badgeUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/badge/${slug}`;
-  const claimUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/claim/${slug}`;
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://getreceipts-web.vercel.app';
+  const badgeUrl = `${baseUrl}/api/badge/${slug}`;
+  const claimUrl = `${baseUrl}/claim/${slug}`;
 
   return {
     title: `${c.text_short} - GetReceipts.org`,
@@ -100,23 +102,24 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 
 export default async function ClaimPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const c = await getClaimBySlug(slug).catch(() => null);
-  if (!c) return <div className="p-8">Not found</div>;
-  
-  // Fetch all data in parallel for better performance
-  const [agg, reviews, srcs, pos, people, jargon, models, relationships, votes, comments] = await Promise.all([
-    getAggregateByClaimId(c.id).catch(() => null),
-    getModelReviewsByClaimId(c.id),
-    getSourcesByClaimId(c.id),
-    getPositionsByClaimId(c.id),
-    getKnowledgePeopleByClaimId(c.id),
-    getKnowledgeJargonByClaimId(c.id),
-    getKnowledgeModelsByClaimId(c.id),
-    getClaimRelationshipsByClaimId(c.id),
-    getVotesByClaimId(c.id),
-    getCommentsByClaimId(c.id)
-  ]);
+  try {
+    const { slug } = await params;
+    const c = await getClaimBySlug(slug).catch(() => null);
+    if (!c) return <div className="p-8">Not found</div>;
+    
+    // Fetch all data in parallel for better performance with error handling
+    const [agg, reviews, srcs, pos, people, jargon, models, relationships, votes, comments] = await Promise.all([
+      getAggregateByClaimId(c.id).catch(() => null),
+      getModelReviewsByClaimId(c.id).catch(() => []),
+      getSourcesByClaimId(c.id).catch(() => []),
+      getPositionsByClaimId(c.id).catch(() => []),
+      getKnowledgePeopleByClaimId(c.id).catch(() => []),
+      getKnowledgeJargonByClaimId(c.id).catch(() => []),
+      getKnowledgeModelsByClaimId(c.id).catch(() => []),
+      getClaimRelationshipsByClaimId(c.id).catch(() => []),
+      getVotesByClaimId(c.id).catch(() => ({ upvotes: 0, downvotes: 0, credible: 0, not_credible: 0 })),
+      getCommentsByClaimId(c.id).catch(() => [])
+    ]);
 
   // Generate JSON-LD structured data
   const jsonLd = {
@@ -179,11 +182,13 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
           
           {/* Voting Widget */}
           <div className="lg:col-span-1">
-            <VotingWidget 
-              claimId={c.id} 
-              initialVotes={votes}
-              disabled={false}
-            />
+            <ErrorBoundary>
+              <VotingWidget 
+                claimId={c.id} 
+                initialVotes={votes}
+                disabled={false}
+              />
+            </ErrorBoundary>
           </div>
         </div>
 
@@ -232,7 +237,9 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
         </div>
 
         {/* Claims Network Graph */}
-        <ClaimGraph claimId={c.id} height={500} />
+        <ErrorBoundary>
+          <ClaimGraph claimId={c.id} height={500} />
+        </ErrorBoundary>
 
         {/* Related Claims */}
         {relationships.length > 0 && (
@@ -262,8 +269,32 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
         )}
 
         {/* Comments Section */}
-        <CommentsSection claimId={c.id} initialComments={comments} />
+        <ErrorBoundary>
+          <CommentsSection claimId={c.id} initialComments={comments} />
+        </ErrorBoundary>
       </div>
     </>
   );
+  } catch (error) {
+    console.error('Error loading claim page:', error);
+    return (
+      <div className="p-8 text-center">
+        <h1 className="text-2xl font-semibold text-red-600 mb-4">Error Loading Claim</h1>
+        <p className="text-gray-600 mb-4">
+          There was an error loading this claim page. This might be due to:
+        </p>
+        <ul className="text-left max-w-md mx-auto text-gray-600 mb-6">
+          <li>• Database connection issues</li>
+          <li>• Missing environment variables</li>
+          <li>• Invalid claim ID</li>
+        </ul>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 }

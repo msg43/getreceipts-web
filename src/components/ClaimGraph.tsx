@@ -50,10 +50,30 @@ export default function ClaimGraph({ claimId, height = 600 }: ClaimGraphProps) {
     try {
       setLoading(true);
       const response = await fetch('/api/graph/claims');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const graphData = await response.json();
+      
+      if (!graphData || !graphData.nodes) {
+        throw new Error('Invalid graph data received');
+      }
+      
       setData(graphData);
     } catch (error) {
       console.error('Error fetching graph data:', error);
+      // Set empty data to prevent rendering issues
+      setData({
+        nodes: [],
+        links: [],
+        metadata: {
+          total_claims: 0,
+          total_relationships: 0,
+          relationship_types: []
+        }
+      });
     } finally {
       setLoading(false);
     }
