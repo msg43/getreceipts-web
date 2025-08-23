@@ -142,6 +142,20 @@ Visit [http://localhost:3000](http://localhost:3000) to see the app.
 - `npm run db:migrate` - Run database migrations
 - `npm run db:seed` - Seed database with demo data
 
+## Development Keyboard Shortcuts
+
+For faster development workflow, the following global Cursor shortcuts are configured:
+
+- **`Cmd+Shift+R`** - **Stage & Commit**: Stages all changes and opens commit dialog with editable AI-generated message
+- **`Cmd+Shift+Y`** - **Push**: Pushes committed changes to the current branch on GitHub
+
+### Git Workflow:
+1. Make your code changes
+2. Press `Cmd+Shift+R` to stage and commit with an editable message
+3. Press `Cmd+Shift+Y` to push to GitHub
+
+These shortcuts work across all Cursor workspaces and provide full control over your commit messages while streamlining the git workflow.
+
 ## API Endpoints
 
 ### Core Endpoints
