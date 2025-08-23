@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { db, supabase } from "@/lib/db";
-import { users, apiKeys, userRoles, userRoleAssignments, auditLog } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { userRoles, userRoleAssignments, auditLog } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { createHash } from "crypto";
 
 export interface AuthUser {
@@ -165,8 +165,8 @@ export async function createAuditLog(
   tableName: string,
   recordId: string,
   context: AuditContext,
-  oldValues?: any,
-  newValues?: any
+  oldValues?: unknown,
+  newValues?: unknown
 ): Promise<void> {
   await db.insert(auditLog).values({
     userId: context.userId || null,

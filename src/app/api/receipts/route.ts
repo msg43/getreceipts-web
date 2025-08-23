@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     if ('error' in authResult) {
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
-    const { user, context } = authResult;
+    const { user } = authResult;
     
     // Rate limiting
     const ip = getClientIP(req);

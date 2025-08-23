@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { apiKeys, users } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { requirePermission, generateApiKey, hashApiKey, createAuditLog } from "@/lib/auth";
 
 // GET all API keys (admin only)
@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     if ('error' in authResult) {
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
-    const { user, context } = authResult;
+    // context not needed for GET operation
 
     const keys = await db
       .select({
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     if ('error' in authResult) {
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
-    const { user, context } = authResult;
+    const { context } = authResult;
 
     const body = await req.json();
     const { userId, name, permissions, expiresAt } = body;
@@ -108,7 +108,7 @@ export async function DELETE(req: NextRequest) {
     if ('error' in authResult) {
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
-    const { user, context } = authResult;
+    const { context } = authResult;
 
     const url = new URL(req.url);
     const keyId = url.searchParams.get('id');

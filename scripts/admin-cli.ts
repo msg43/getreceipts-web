@@ -181,7 +181,7 @@ async function removeRole(email: string, roleName: string) {
   }
 
   // Remove assignment
-  const result = await db
+  await db
     .delete(userRoleAssignments)
     .where(and(
       eq(userRoleAssignments.userId, user.id),
@@ -265,7 +265,7 @@ async function showAuditLog(tableName?: string) {
     .limit(20);
 
   if (tableName) {
-    query = query.where(eq(auditLog.tableName, tableName)) as any;
+    query = query.where(eq(auditLog.tableName, tableName));
   }
 
   const logs = await query;

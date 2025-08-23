@@ -22,13 +22,19 @@ interface Jargon {
   examples?: string[];
 }
 
+interface Relationship {
+  from: string;
+  type: string;
+  to: string;
+}
+
 interface MentalModel {
   id: string;
   name: string;
   description: string;
   domain?: string;
   key_concepts?: string[];
-  relationships?: any[];
+  relationships?: Relationship[];
 }
 
 interface KnowledgeArtifactsProps {
@@ -168,7 +174,7 @@ export default function KnowledgeArtifacts({ people, jargon, models }: Knowledge
                   <div className="space-y-1">
                     <span className="text-xs font-medium text-gray-500">Relationships:</span>
                     <div className="text-xs space-y-1">
-                      {model.relationships.map((rel: any, idx: number) => (
+                      {model.relationships.map((rel: Relationship, idx: number) => (
                         <div key={idx} className="text-gray-600">
                           {rel.from} <span className="text-blue-600">{rel.type}</span> {rel.to}
                         </div>

@@ -66,7 +66,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ cla
 
     // Add people
     if (body.people?.length > 0) {
-      const peopleValues = body.people.map((person: any) => ({
+      const peopleValues = body.people.map((person: { name: string; bio?: string; expertise?: string[]; credibility_score?: number; sources?: string[] }) => ({
         claimId,
         name: person.name,
         bio: person.bio,
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ cla
 
     // Add jargon
     if (body.jargon?.length > 0) {
-      const jargonValues = body.jargon.map((jargon: any) => ({
+      const jargonValues = body.jargon.map((jargon: { term: string; definition: string; domain?: string; related_terms?: string[]; examples?: string[] }) => ({
         claimId,
         term: jargon.term,
         definition: jargon.definition,
@@ -108,7 +108,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ cla
 
     // Add mental models
     if (body.mental_models?.length > 0) {
-      const modelValues = body.mental_models.map((model: any) => ({
+      const modelValues = body.mental_models.map((model: { name: string; description: string; domain?: string; key_concepts?: string[]; relationships?: unknown[] }) => ({
         claimId,
         name: model.name,
         description: model.description,

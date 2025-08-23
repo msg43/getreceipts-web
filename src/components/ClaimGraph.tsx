@@ -14,6 +14,8 @@ interface GraphNode {
   size: number;
   x?: number;
   y?: number;
+  fx?: number | null;
+  fy?: number | null;
 }
 
 interface GraphLink {
@@ -72,11 +74,11 @@ export default function ClaimGraph({ claimId, height = 600 }: ClaimGraphProps) {
     const containerHeight = height;
     
     // Create simulation
-    const simulation = d3.forceSimulation(data.nodes as any)
-      .force("link", d3.forceLink(data.links).id((d: any) => d.id).distance(100))
+    const simulation = d3.forceSimulation(data.nodes)
+      .force("link", d3.forceLink(data.links).id((d: GraphNode) => d.id).distance(100))
       .force("charge", d3.forceManyBody().strength(-300))
       .force("center", d3.forceCenter(width / 2, containerHeight / 2))
-      .force("collision", d3.forceCollide().radius((d: any) => d.size + 5));
+      .force("collision", d3.forceCollide().radius((d: GraphNode) => d.size + 5));
     
     // Create arrow markers for directed edges
     svg.append("defs").selectAll("marker")
@@ -125,7 +127,7 @@ export default function ClaimGraph({ claimId, height = 600 }: ClaimGraphProps) {
       .data(data.nodes)
       .enter().append("g")
       .attr("cursor", "pointer")
-      .call(d3.drag<any, any>()
+      .call(d3.drag<SVGGElement, GraphNode>()
         .on("start", dragstarted)
         .on("drag", dragged)
         .on("end", dragended))
@@ -166,26 +168,26 @@ export default function ClaimGraph({ claimId, height = 600 }: ClaimGraphProps) {
     // Update positions on simulation tick
     simulation.on("tick", () => {
       link
-        .attr("x1", (d: any) => d.source.x)
-        .attr("y1", (d: any) => d.source.y)
-        .attr("x2", (d: any) => d.target.x)
-        .attr("y2", (d: any) => d.target.y);
+        .attr("x1", (d: GraphLink) => (d.source as GraphNode).x)
+        .attr("y1", (d: GraphLink) => (d.source as GraphNode).y)
+        .attr("x2", (d: GraphLink) => (d.target as GraphNode).x)
+        .attr("y2", (d: GraphLink) => (d.target as GraphNode).y);
       
-      node.attr("transform", (d: any) => `translate(${d.x},${d.y})`);
+      node.attr("transform", (d: GraphNode) => `translate(${d.x},${d.y})`);
     });
     
-    function dragstarted(event: any, d: any) {
+    function dragstarted(event: d3.D3DragEvent<SVGGElement, GraphNode, GraphNode>, d: GraphNode) {
       if (!event.active) simulation.alphaTarget(0.3).restart();
       d.fx = d.x;
       d.fy = d.y;
     }
     
-    function dragged(event: any, d: any) {
+    function dragged(event: d3.D3DragEvent<SVGGElement, GraphNode, GraphNode>, d: GraphNode) {
       d.fx = event.x;
       d.fy = event.y;
     }
     
-    function dragended(event: any, d: any) {
+    function dragended(event: d3.D3DragEvent<SVGGElement, GraphNode, GraphNode>, d: GraphNode) {
       if (!event.active) simulation.alphaTarget(0);
       d.fx = null;
       d.fy = null;

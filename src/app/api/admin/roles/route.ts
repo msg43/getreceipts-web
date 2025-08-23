@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     if ('error' in authResult) {
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
-    const { user, context } = authResult;
+    const { context } = authResult;
 
     const body = await req.json();
     const {
@@ -88,7 +88,7 @@ export async function PUT(req: NextRequest) {
     if ('error' in authResult) {
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
-    const { user, context } = authResult;
+    const { context } = authResult;
 
     const body = await req.json();
     const { id, ...updates } = body;

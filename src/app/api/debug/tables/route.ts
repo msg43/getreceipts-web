@@ -6,7 +6,7 @@ export async function GET() {
     console.log("🔍 Testing Supabase client connection...");
     
     // Test 1: Check if we can connect to Supabase
-    const { data: authTest, error: authError } = await supabase.auth.getUser();
+    const { error: authError } = await supabase.auth.getUser();
     
     // Test 2: Try to query api_keys table directly with Supabase client
     const { data: apiKeys, error: apiKeysError } = await supabase

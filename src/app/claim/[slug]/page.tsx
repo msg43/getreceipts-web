@@ -239,7 +239,7 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
           <div className="p-6 border rounded-lg">
             <h2 className="font-medium mb-3">Related Claims</h2>
             <div className="space-y-2">
-              {relationships.map((rel: any) => (
+              {relationships.map((rel: { id: string; relationship_type: string; to_claim?: { slug: string; text_short: string }; strength?: number }) => (
                 <div key={rel.id} className="flex items-center gap-2 p-2 border rounded">
                   <span className={`px-2 py-1 rounded text-xs font-medium ${
                     rel.relationship_type === 'supports' ? 'bg-green-100 text-green-800' :

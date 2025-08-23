@@ -117,7 +117,8 @@ export async function getClaimRelationshipsByClaimId(claimId: string) {
   return data || []
 }
 
-export async function getVotesByClaimId(claimId: string) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function getVotesByClaimId(_claimId: string) {
   // For demo purposes, return mock data
   // In production, this would query the votes table
   return {
@@ -128,7 +129,8 @@ export async function getVotesByClaimId(claimId: string) {
   }
 }
 
-export async function getCommentsByClaimId(claimId: string) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function getCommentsByClaimId(_claimId: string) {
   // For demo purposes, return mock data
   // In production, this would query the comments table
   return [

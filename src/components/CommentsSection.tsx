@@ -22,7 +22,8 @@ interface CommentsSectionProps {
   initialComments?: Comment[];
 }
 
-export default function CommentsSection({ claimId, initialComments = [] }: CommentsSectionProps) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export default function CommentsSection({ claimId: _claimId, initialComments = [] }: CommentsSectionProps) {
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);

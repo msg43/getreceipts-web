@@ -51,10 +51,10 @@ export default function VotingWidget({
         const newVotes = { ...votes };
         if (userVote) {
           // Remove previous vote
-          (newVotes as any)[userVote] = Math.max(0, (newVotes as any)[userVote] - 1);
+          newVotes[userVote as keyof VoteData] = Math.max(0, newVotes[userVote as keyof VoteData] - 1);
         }
         // Add new vote
-        (newVotes as any)[voteType] = (newVotes as any)[voteType] + 1;
+        newVotes[voteType as keyof VoteData] = newVotes[voteType as keyof VoteData] + 1;
         setVotes(newVotes);
         setUserVote(voteType);
       }
@@ -63,9 +63,9 @@ export default function VotingWidget({
       // For demo purposes, still update the UI
       const newVotes = { ...votes };
       if (userVote) {
-        (newVotes as any)[userVote] = Math.max(0, (newVotes as any)[userVote] - 1);
+        newVotes[userVote as keyof VoteData] = Math.max(0, newVotes[userVote as keyof VoteData] - 1);
       }
-      (newVotes as any)[voteType] = (newVotes as any)[voteType] + 1;
+      newVotes[voteType as keyof VoteData] = newVotes[voteType as keyof VoteData] + 1;
       setVotes(newVotes);
       setUserVote(voteType);
     } finally {

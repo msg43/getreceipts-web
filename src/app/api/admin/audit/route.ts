@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { auditLog, users, apiKeys } from "@/db/schema";
-import { desc, eq, like, and, gte, lte } from "drizzle-orm";
+import { desc, eq, and, gte, lte } from "drizzle-orm";
 import { requirePermission } from "@/lib/auth";
 
 // GET audit log with filtering and pagination
