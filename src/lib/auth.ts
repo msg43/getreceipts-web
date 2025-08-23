@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { db, supabase } from "@/lib/db";
 import { userRoles, userRoleAssignments, auditLog } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { createHash } from "crypto";
 
 export interface AuthUser {
@@ -54,6 +54,19 @@ export async function authenticateRequest(req: NextRequest): Promise<AuthUser | 
   return null;
 }
 
+interface SupabaseApiKeyResponse {
+  id: string;
+  user_id: string;
+  name: string;
+  permissions: string[];
+  is_active: number;
+  expires_at: string | null;
+  users: {
+    email: string;
+    name: string | null;
+  }[];
+}
+
 // Authenticate API key using Supabase client
 async function authenticateApiKey(apiKey: string): Promise<AuthUser | null> {
   const keyHash = hashApiKey(apiKey);
@@ -81,7 +94,7 @@ async function authenticateApiKey(apiKey: string): Promise<AuthUser | null> {
     return null;
   }
 
-  const keyRecord = keyRecords?.[0];
+  const keyRecord = keyRecords?.[0] as SupabaseApiKeyResponse | undefined;
   if (!keyRecord) {
     console.log("🔍 No API key found for hash:", keyHash);
     return null;
@@ -103,8 +116,8 @@ async function authenticateApiKey(apiKey: string): Promise<AuthUser | null> {
 
   return {
     id: keyRecord.user_id,
-    email: keyRecord.users.email!,
-    name: keyRecord.users.name || undefined,
+    email: keyRecord.users[0]?.email || '',
+    name: keyRecord.users[0]?.name || undefined,
     permissions: keyRecord.permissions || [],
     isApiKey: true,
     apiKeyName: keyRecord.name,
@@ -148,8 +161,10 @@ export async function checkUserHasRole(userId: string, roleName: string): Promis
     .select()
     .from(userRoleAssignments)
     .leftJoin(userRoles, eq(userRoleAssignments.roleId, userRoles.id))
-    .where(eq(userRoleAssignments.userId, userId))
-    .where(eq(userRoles.name, roleName));
+    .where(and(
+      eq(userRoleAssignments.userId, userId),
+      eq(userRoles.name, roleName)
+    ));
 
   return !!assignment;
 }
@@ -210,7 +225,7 @@ export async function requirePermission(
   const context: AuditContext = {
     userId: user.isApiKey ? undefined : user.id,
     apiKeyId: user.isApiKey ? user.id : undefined,
-    ipAddress: req.ip || req.headers.get('x-forwarded-for') || 'unknown',
+    ipAddress: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown',
     userAgent: req.headers.get('user-agent') || 'unknown',
   };
 

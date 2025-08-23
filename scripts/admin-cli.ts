@@ -249,7 +249,9 @@ async function listApiKeys() {
 async function showAuditLog(tableName?: string) {
   console.log("📋 Audit Log\n");
   
-  let query = db
+  const whereCondition = tableName ? eq(auditLog.tableName, tableName) : undefined;
+
+  const logs = await db
     .select({
       action: auditLog.action,
       tableName: auditLog.tableName,
@@ -261,14 +263,9 @@ async function showAuditLog(tableName?: string) {
     .from(auditLog)
     .leftJoin(users, eq(auditLog.userId, users.id))
     .leftJoin(apiKeys, eq(auditLog.apiKeyId, apiKeys.id))
+    .where(whereCondition)
     .orderBy(desc(auditLog.createdAt))
     .limit(20);
-
-  if (tableName) {
-    query = query.where(eq(auditLog.tableName, tableName));
-  }
-
-  const logs = await query;
   
   for (const log of logs) {
     const actor = log.userEmail || log.apiKeyName || 'Unknown';

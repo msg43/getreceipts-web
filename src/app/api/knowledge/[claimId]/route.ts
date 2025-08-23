@@ -58,7 +58,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ cla
       return NextResponse.json({ error: "Claim not found" }, { status: 404 });
     }
 
-    const insertResults = {
+    const insertResults: {
+      people: typeof knowledgePeople.$inferSelect[];
+      jargon: typeof knowledgeJargon.$inferSelect[];
+      models: typeof knowledgeModels.$inferSelect[];
+    } = {
       people: [],
       jargon: [],
       models: [],

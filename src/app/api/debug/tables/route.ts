@@ -43,7 +43,7 @@ export async function GET() {
     console.error("Debug endpoint error:", error);
     return NextResponse.json({
       success: false,
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
       connectionInfo: "Connection failed"
     }, { status: 500 });
   }

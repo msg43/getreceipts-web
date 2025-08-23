@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { auditLog, users, apiKeys } from "@/db/schema";
-import { desc, eq, and, gte, lte } from "drizzle-orm";
+import { desc, eq, and, gte, lte, count } from "drizzle-orm";
 import { requirePermission } from "@/lib/auth";
 
 // GET audit log with filtering and pagination
@@ -33,8 +33,8 @@ export async function GET(req: NextRequest) {
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
     // Get total count
-    const [{ count }] = await db
-      .select({ count: auditLog.id })
+    const [{ count: totalCount }] = await db
+      .select({ count: count() })
       .from(auditLog)
       .where(whereClause);
 
@@ -68,8 +68,8 @@ export async function GET(req: NextRequest) {
       pagination: {
         page,
         limit,
-        total: count,
-        totalPages: Math.ceil(count / limit),
+        total: totalCount,
+        totalPages: Math.ceil(totalCount / limit),
       },
       filters: {
         action,

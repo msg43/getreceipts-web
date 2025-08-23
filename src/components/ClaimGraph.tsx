@@ -2,25 +2,20 @@
 
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
+import { SimulationNodeDatum, SimulationLinkDatum } from 'd3';
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-interface GraphNode {
+interface GraphNode extends SimulationNodeDatum {
   id: string;
   slug: string;
   text: string;
   topics: string[];
   consensus: number;
   size: number;
-  x?: number;
-  y?: number;
-  fx?: number | null;
-  fy?: number | null;
 }
 
-interface GraphLink {
-  source: string | GraphNode;
-  target: string | GraphNode;
+interface GraphLink extends SimulationLinkDatum<GraphNode> {
   type: string;
   strength: number;
   evidence?: string;
@@ -75,10 +70,10 @@ export default function ClaimGraph({ claimId, height = 600 }: ClaimGraphProps) {
     
     // Create simulation
     const simulation = d3.forceSimulation(data.nodes)
-      .force("link", d3.forceLink(data.links).id((d: GraphNode) => d.id).distance(100))
+      .force("link", d3.forceLink<GraphNode, GraphLink>(data.links).id(d => d.id).distance(100))
       .force("charge", d3.forceManyBody().strength(-300))
       .force("center", d3.forceCenter(width / 2, containerHeight / 2))
-      .force("collision", d3.forceCollide().radius((d: GraphNode) => d.size + 5));
+      .force("collision", d3.forceCollide<GraphNode>().radius(d => d.size + 5));
     
     // Create arrow markers for directed edges
     svg.append("defs").selectAll("marker")
@@ -168,12 +163,12 @@ export default function ClaimGraph({ claimId, height = 600 }: ClaimGraphProps) {
     // Update positions on simulation tick
     simulation.on("tick", () => {
       link
-        .attr("x1", (d: GraphLink) => (d.source as GraphNode).x)
-        .attr("y1", (d: GraphLink) => (d.source as GraphNode).y)
-        .attr("x2", (d: GraphLink) => (d.target as GraphNode).x)
-        .attr("y2", (d: GraphLink) => (d.target as GraphNode).y);
+        .attr("x1", (d: GraphLink) => (d.source as GraphNode).x || 0)
+        .attr("y1", (d: GraphLink) => (d.source as GraphNode).y || 0)
+        .attr("x2", (d: GraphLink) => (d.target as GraphNode).x || 0)
+        .attr("y2", (d: GraphLink) => (d.target as GraphNode).y || 0);
       
-      node.attr("transform", (d: GraphNode) => `translate(${d.x},${d.y})`);
+      node.attr("transform", (d: GraphNode) => `translate(${d.x || 0},${d.y || 0})`);
     });
     
     function dragstarted(event: d3.D3DragEvent<SVGGElement, GraphNode, GraphNode>, d: GraphNode) {

@@ -130,7 +130,7 @@ export const claimComments = pgTable("claim_comments", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   claimId: uuid("claim_id").notNull().references(() => claims.id, { onDelete: "cascade" }),
-  parentId: uuid("parent_id").references(() => claimComments.id, { onDelete: "cascade" }),
+  parentId: uuid("parent_id"),
   content: text("content").notNull(),
   voteScore: integer("vote_score").default(0),
   createdAt: timestamp("created_at").defaultNow(),

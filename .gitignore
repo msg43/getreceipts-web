@@ -67,3 +67,6 @@ drizzle/
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Private documentation
+Docs/Private/
