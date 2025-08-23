@@ -5,20 +5,18 @@ export async function GET() {
     console.log("🔍 Testing environment variables...");
     
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE;
     
     return NextResponse.json({
       success: true,
       environment: {
         supabaseUrl: supabaseUrl ? "✅ Set" : "❌ Missing",
         serviceRoleKey: serviceRoleKey ? "✅ Set" : "❌ Missing",
-        serviceRoleKeyLength: serviceRoleKey?.length || 0,
-        serviceRoleKeyStart: serviceRoleKey?.substring(0, 20) || "Not found",
-      }
+      },
+      message: "Environment check completed"
     });
-    
   } catch (error) {
-    console.error("Auth debug error:", error);
+    console.error("🚨 Environment check failed:", error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'

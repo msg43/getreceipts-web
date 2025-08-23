@@ -6,7 +6,7 @@ console.log('🔧 Trying Supabase connection...');
 
 // Try using Supabase client connection
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder_key';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE || 'placeholder_key';
 
 export const supabase = createClient(supabaseUrl, supabaseServiceKey);
 

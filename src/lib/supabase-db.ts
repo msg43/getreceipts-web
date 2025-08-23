@@ -1,24 +1,21 @@
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE!
 
 export const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 // Helper functions for database operations
 export async function getClaimBySlug(slug: string) {
   console.log('Fetching claim by slug:', slug)
+  
   const { data, error } = await supabase
     .from('claims')
     .select('*')
     .eq('slug', slug)
     .single()
   
-  console.log('Supabase response:', { data, error })
-  if (error) {
-    console.error('Supabase error:', error)
-    throw error
-  }
+  if (error) throw error
   return data
 }
 
@@ -29,7 +26,7 @@ export async function getAggregateByClaimId(claimId: string) {
     .eq('claim_id', claimId)
     .single()
   
-  if (error && error.code !== 'PGRST116') throw error // PGRST116 = no rows
+  if (error) throw error
   return data
 }
 
@@ -63,17 +60,6 @@ export async function getPositionsByClaimId(claimId: string) {
   return data || []
 }
 
-export async function getAllClaims() {
-  const { data, error } = await supabase
-    .from('claims')
-    .select('*')
-    .order('created_at', { ascending: false })
-  
-  if (error) throw error
-  return data || []
-}
-
-// Knowledge artifact functions
 export async function getKnowledgePeopleByClaimId(claimId: string) {
   const { data, error } = await supabase
     .from('knowledge_people')
@@ -135,18 +121,18 @@ export async function getCommentsByClaimId(_claimId: string) {
   // In production, this would query the comments table
   return [
     {
-      id: 'demo-comment-1',
-      content: 'This is a really interesting claim. I would like to see more evidence supporting this position.',
-      author: 'Research Analyst',
+      id: '1',
+      content: 'This is a sample comment for demonstration purposes.',
+      author: 'Demo User',
       voteScore: 5,
-      createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      createdAt: new Date().toISOString(),
     },
     {
-      id: 'demo-comment-2',
-      content: 'The methodology described here seems sound, but I wonder about the sample size limitations.',
-      author: 'Data Scientist',
-      voteScore: 3,
-      createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+      id: '2', 
+      content: 'Another example comment showing the discussion format.',
+      author: 'Another User',
+      voteScore: 2,
+      createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
     }
   ]
 }
