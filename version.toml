@@ -1,0 +1,9 @@
+[version]
+major = 1
+minor = 0
+patch = 0
+build = 2
+
+[metadata]
+last_updated = "2025-08-23"
+description = "GetReceipts.org - Claim Receipt Platform"

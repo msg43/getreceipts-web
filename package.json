@@ -10,9 +10,12 @@
     "test": "vitest",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:seed": "ts-node scripts/seed.ts"
+    "db:seed": "ts-node scripts/seed.ts",
+    "version:increment": "node scripts/increment-version.js",
+    "push": "npm run version:increment && git add version.toml && git commit -m \"Auto-increment version\" && git push"
   },
   "dependencies": {
+    "@iarna/toml": "^2.2.5",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dialog": "^1.1.15",

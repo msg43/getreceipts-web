@@ -2,8 +2,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import LiveClaims from "@/components/LiveClaims";
+import { getVersion } from "@/lib/version";
 
 export default function Home() {
+  const version = getVersion();
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
@@ -115,10 +118,8 @@ export default function Home() {
             <div className="text-slate-600 dark:text-slate-400 mb-4 md:mb-0">
               © 2025 GetReceipts.org
             </div>
-            <div className="flex space-x-6">
-              <Link href="https://github.com/msg43/GetReceipts" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
-                GitHub
-              </Link>
+            <div className="text-xs text-slate-500 dark:text-slate-500 font-mono">
+              {version}
             </div>
           </div>
         </div>
