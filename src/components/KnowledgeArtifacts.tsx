@@ -8,9 +8,9 @@ interface Person {
   id: string;
   name: string;
   bio?: string;
-  expertise: string[];
-  credibilityScore?: string;
-  sources: string[];
+  expertise?: string[];
+  credibility_score?: number;
+  sources?: string[];
 }
 
 interface Jargon {
@@ -18,8 +18,8 @@ interface Jargon {
   term: string;
   definition: string;
   domain?: string;
-  relatedTerms: string[];
-  examples: string[];
+  related_terms?: string[];
+  examples?: string[];
 }
 
 interface MentalModel {
@@ -27,8 +27,8 @@ interface MentalModel {
   name: string;
   description: string;
   domain?: string;
-  keyConcepts: string[];
-  relationships: any;
+  key_concepts?: string[];
+  relationships?: any[];
 }
 
 interface KnowledgeArtifactsProps {
@@ -38,7 +38,12 @@ interface KnowledgeArtifactsProps {
 }
 
 export default function KnowledgeArtifacts({ people, jargon, models }: KnowledgeArtifactsProps) {
-  if (!people.length && !jargon.length && !models.length) {
+  // Ensure arrays are defined
+  const safePeople = people || [];
+  const safeJargon = jargon || [];
+  const safeModels = models || [];
+
+  if (!safePeople.length && !safeJargon.length && !safeModels.length) {
     return null;
   }
 
@@ -48,7 +53,7 @@ export default function KnowledgeArtifacts({ people, jargon, models }: Knowledge
         <CardTitle className="flex items-center gap-2">
           🧠 Knowledge Artifacts
           <Badge variant="secondary">
-            {people.length + jargon.length + models.length} items
+            {safePeople.length + safeJargon.length + safeModels.length} items
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -56,31 +61,31 @@ export default function KnowledgeArtifacts({ people, jargon, models }: Knowledge
         <Tabs defaultValue="people" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="people">
-              People ({people.length})
+              People ({safePeople.length})
             </TabsTrigger>
             <TabsTrigger value="jargon">
-              Jargon ({jargon.length})
+              Jargon ({safeJargon.length})
             </TabsTrigger>
             <TabsTrigger value="models">
-              Models ({models.length})
+              Models ({safeModels.length})
             </TabsTrigger>
           </TabsList>
           
           <TabsContent value="people" className="space-y-4">
-            {people.map((person) => (
+            {safePeople.map((person) => (
               <div key={person.id} className="border rounded-lg p-4 space-y-2">
                 <div className="flex items-center justify-between">
                   <h4 className="font-semibold">{person.name}</h4>
-                  {person.credibilityScore && (
+                  {person.credibility_score && (
                     <Badge variant="outline">
-                      Credibility: {Math.round(Number(person.credibilityScore) * 100)}%
+                      Credibility: {Math.round(Number(person.credibility_score) * 100)}%
                     </Badge>
                   )}
                 </div>
                 {person.bio && (
                   <p className="text-sm text-gray-600">{person.bio}</p>
                 )}
-                {person.expertise.length > 0 && (
+                {person.expertise && person.expertise.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {person.expertise.map((skill, idx) => (
                       <Badge key={idx} variant="secondary" className="text-xs">
@@ -89,12 +94,22 @@ export default function KnowledgeArtifacts({ people, jargon, models }: Knowledge
                     ))}
                   </div>
                 )}
+                {person.sources && person.sources.length > 0 && (
+                  <div className="space-y-1">
+                    <span className="text-xs font-medium text-gray-500">Sources:</span>
+                    <div className="text-xs space-y-1">
+                      {person.sources.map((source, idx) => (
+                        <div key={idx} className="text-gray-600">• {source}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </TabsContent>
           
           <TabsContent value="jargon" className="space-y-4">
-            {jargon.map((term) => (
+            {safeJargon.map((term) => (
               <div key={term.id} className="border rounded-lg p-4 space-y-2">
                 <div className="flex items-center gap-2">
                   <h4 className="font-semibold">{term.term}</h4>
@@ -103,7 +118,7 @@ export default function KnowledgeArtifacts({ people, jargon, models }: Knowledge
                   )}
                 </div>
                 <p className="text-sm">{term.definition}</p>
-                {term.examples.length > 0 && (
+                {term.examples && term.examples.length > 0 && (
                   <div className="space-y-1">
                     <span className="text-xs font-medium text-gray-500">Examples:</span>
                     <ul className="text-xs space-y-1">
@@ -113,10 +128,10 @@ export default function KnowledgeArtifacts({ people, jargon, models }: Knowledge
                     </ul>
                   </div>
                 )}
-                {term.relatedTerms.length > 0 && (
+                {term.related_terms && term.related_terms.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     <span className="text-xs font-medium text-gray-500">Related:</span>
-                    {term.relatedTerms.map((related, idx) => (
+                    {term.related_terms.map((related, idx) => (
                       <Badge key={idx} variant="secondary" className="text-xs">
                         {related}
                       </Badge>
@@ -128,7 +143,7 @@ export default function KnowledgeArtifacts({ people, jargon, models }: Knowledge
           </TabsContent>
           
           <TabsContent value="models" className="space-y-4">
-            {models.map((model) => (
+            {safeModels.map((model) => (
               <div key={model.id} className="border rounded-lg p-4 space-y-2">
                 <div className="flex items-center gap-2">
                   <h4 className="font-semibold">{model.name}</h4>
@@ -137,11 +152,11 @@ export default function KnowledgeArtifacts({ people, jargon, models }: Knowledge
                   )}
                 </div>
                 <p className="text-sm">{model.description}</p>
-                {model.keyConcepts.length > 0 && (
+                {model.key_concepts && model.key_concepts.length > 0 && (
                   <div className="space-y-1">
                     <span className="text-xs font-medium text-gray-500">Key Concepts:</span>
                     <div className="flex flex-wrap gap-1">
-                      {model.keyConcepts.map((concept, idx) => (
+                      {model.key_concepts.map((concept, idx) => (
                         <Badge key={idx} variant="secondary" className="text-xs">
                           {concept}
                         </Badge>

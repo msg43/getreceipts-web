@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { 
-  claims, sources, positions, aggregates, 
-  knowledgePeople, knowledgeJargon, knowledgeModels, claimRelationships 
-} from "@/db/schema";
+import { supabase } from "@/lib/db";
 import { ReceiptSchema } from "@/lib/rf1";
 import { nanoid } from "nanoid";
 import { apiLimiter, getClientIP } from "@/lib/rate-limit";
-import { requirePermission, createAuditLog } from "@/lib/auth";
+import { requirePermission } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
@@ -44,38 +40,75 @@ export async function POST(req: NextRequest) {
     const data = parsed.data;
     const slug = nanoid(10);
 
-    const [c] = await db.insert(claims).values({
-      slug,
-      textShort: data.claim_text,
-      textLong: data.claim_long,
-      topics: data.topics,
-      createdBy: user.id,
-    }).returning();
+    console.log("🚀 Creating claim with Supabase client...");
 
-    // Audit log for claim creation
-    await createAuditLog('CREATE', 'claims', c.id, context, null, {
-      slug: c.slug,
-      textShort: c.textShort,
-      textLong: c.textLong,
-      topics: c.topics,
-      createdBy: c.createdBy,
-    });
+    // Insert claim using Supabase client
+    const { data: claim, error: claimError } = await supabase
+      .from('claims')
+      .insert({
+        slug,
+        text_short: data.claim_text,
+        text_long: data.claim_long,
+        topics: data.topics,
+        created_by: user.id,
+      })
+      .select('*')
+      .single();
 
-    if (data.sources.length) {
-      await db.insert(sources).values(
-        data.sources.map((s) => ({
-          claimId: c.id, type: s.type, title: s.title, url: s.url, doi: s.doi, venue: s.venue
-        }))
-      );
+    if (claimError) {
+      console.error("❌ Claim insert error:", claimError);
+      return NextResponse.json({ 
+        error: "Failed to create claim", 
+        details: claimError.message 
+      }, { status: 500 });
     }
 
-    const stanceRows = [
-      ...data.supporters.map(n => ({ claimId: c.id, stance: "support" as const, quote: n })),
-      ...data.opponents.map(n => ({ claimId: c.id, stance: "oppose" as const, quote: n })),
-    ];
-    if (stanceRows.length) await db.insert(positions).values(stanceRows);
+    console.log("✅ Created claim:", claim.id);
 
-    await db.insert(aggregates).values({ claimId: c.id, consensusScore: "0.5" });
+    // Insert sources if provided
+    if (data.sources.length > 0) {
+      const { error: sourcesError } = await supabase
+        .from('sources')
+        .insert(
+          data.sources.map((s) => ({
+            claim_id: claim.id,
+            type: s.type,
+            title: s.title,
+            url: s.url,
+            doi: s.doi,
+            venue: s.venue
+          }))
+        );
+      
+      if (sourcesError) {
+        console.error("⚠️ Sources insert error:", sourcesError);
+      }
+    }
+
+    // Insert positions (supporters/opponents)
+    const stanceRows = [
+      ...data.supporters.map(quote => ({ claim_id: claim.id, stance: "support", quote })),
+      ...data.opponents.map(quote => ({ claim_id: claim.id, stance: "oppose", quote })),
+    ];
+    
+    if (stanceRows.length > 0) {
+      const { error: positionsError } = await supabase
+        .from('positions')
+        .insert(stanceRows);
+        
+      if (positionsError) {
+        console.error("⚠️ Positions insert error:", positionsError);
+      }
+    }
+
+    // Insert aggregates
+    const { error: aggregatesError } = await supabase
+      .from('aggregates')
+      .insert({ claim_id: claim.id, consensus_score: "0.5" });
+      
+    if (aggregatesError) {
+      console.error("⚠️ Aggregates insert error:", aggregatesError);
+    }
 
     // Handle knowledge artifacts from Knowledge_Chipper
     if (data.knowledge_artifacts) {
@@ -90,70 +123,71 @@ export async function POST(req: NextRequest) {
       
       // Insert people
       if (artifacts.people?.length > 0) {
-        const peopleValues = artifacts.people.map((person) => ({
-          claimId: c.id,
-          name: person.name,
-          bio: person.bio,
-          expertise: person.expertise,
-          credibilityScore: person.credibility_score?.toString(),
-          sources: person.sources,
-          createdBy: user.id,
-        }));
-
-        const insertedPeople = await db.insert(knowledgePeople).values(peopleValues).returning();
-        
-        // Audit log for knowledge people
-        for (const person of insertedPeople) {
-          await createAuditLog('CREATE', 'knowledge_people', person.id, context, null, person);
+        const { error: peopleError } = await supabase
+          .from('knowledge_people')
+          .insert(
+            artifacts.people.map((person) => ({
+              claim_id: claim.id,
+              name: person.name,
+              bio: person.bio,
+              expertise: person.expertise,
+              credibility_score: person.credibility_score?.toString(),
+              sources: person.sources,
+              created_by: user.id,
+            }))
+          );
+          
+        if (peopleError) {
+          console.error("⚠️ Knowledge people insert error:", peopleError);
         }
       }
       
       // Insert jargon
       if (artifacts.jargon?.length > 0) {
-        const jargonValues = artifacts.jargon.map((jargon) => ({
-          claimId: c.id,
-          term: jargon.term,
-          definition: jargon.definition,
-          domain: jargon.domain,
-          relatedTerms: jargon.related_terms,
-          examples: jargon.examples,
-          createdBy: user.id,
-        }));
-
-        const insertedJargon = await db.insert(knowledgeJargon).values(jargonValues).returning();
-        
-        // Audit log for knowledge jargon
-        for (const jargon of insertedJargon) {
-          await createAuditLog('CREATE', 'knowledge_jargon', jargon.id, context, null, jargon);
+        const { error: jargonError } = await supabase
+          .from('knowledge_jargon')
+          .insert(
+            artifacts.jargon.map((jargon) => ({
+              claim_id: claim.id,
+              term: jargon.term,
+              definition: jargon.definition,
+              domain: jargon.domain,
+              related_terms: jargon.related_terms,
+              examples: jargon.examples,
+              created_by: user.id,
+            }))
+          );
+          
+        if (jargonError) {
+          console.error("⚠️ Knowledge jargon insert error:", jargonError);
         }
       }
       
       // Insert mental models
       if (artifacts.mental_models?.length > 0) {
-        const modelValues = artifacts.mental_models.map((model) => ({
-          claimId: c.id,
-          name: model.name,
-          description: model.description,
-          domain: model.domain,
-          keyConcepts: model.key_concepts,
-          relationships: model.relationships,
-          createdBy: user.id,
-        }));
-
-        const insertedModels = await db.insert(knowledgeModels).values(modelValues).returning();
-        
-        // Audit log for knowledge models
-        for (const model of insertedModels) {
-          await createAuditLog('CREATE', 'knowledge_models', model.id, context, null, model);
+        const { error: modelsError } = await supabase
+          .from('knowledge_models')
+          .insert(
+            artifacts.mental_models.map((model) => ({
+              claim_id: claim.id,
+              name: model.name,
+              description: model.description,
+              domain: model.domain,
+              key_concepts: model.key_concepts,
+              relationships: model.relationships,
+              created_by: user.id,
+            }))
+          );
+          
+        if (modelsError) {
+          console.error("⚠️ Knowledge models insert error:", modelsError);
         }
       }
-      
-      // Note: claim_relationships will be processed after all claims are inserted
-      // This is handled in a separate endpoint for batch relationship processing
     }
 
     return NextResponse.json({
-      claim_id: c.id,
+      success: true,
+      claim_id: claim.id,
       url: `/claim/${slug}`,
       badge_url: `/api/badge/${slug}.svg`,
       created_by: user.email,
@@ -163,8 +197,9 @@ export async function POST(req: NextRequest) {
         people: data.knowledge_artifacts?.people?.length || 0,
         jargon: data.knowledge_artifacts?.jargon?.length || 0,
         mental_models: data.knowledge_artifacts?.mental_models?.length || 0
-      }
-    });
+      },
+      data: claim
+    }, { status: 201 });
   } catch (e: unknown) {
     const errorMessage = e instanceof Error ? e.message : "Server error";
     return NextResponse.json({ error: errorMessage }, { status: 500 });

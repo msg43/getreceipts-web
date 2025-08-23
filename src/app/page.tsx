@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import LiveClaims from "@/components/LiveClaims";
 
 export default function Home() {
   return (
@@ -14,13 +14,9 @@ export default function Home() {
               <div className="text-2xl font-bold text-slate-900 dark:text-white">
                 🧾 GetReceipts.org
               </div>
-              <Badge variant="secondary">MVP</Badge>
             </div>
             <nav className="hidden md:flex items-center space-x-6">
-              <Link href="/submit" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
-                Submit
-              </Link>
-              <Link href="https://github.com" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+              <Link href="https://github.com/msg43/GetReceipts" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
                 GitHub
               </Link>
             </nav>
@@ -38,12 +34,9 @@ export default function Home() {
           A platform for publishing and sharing &quot;receipts&quot; of claims and counterclaims 
           with sources and a Consensus Meter. Built for transparency and evidence-based discourse.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button asChild size="lg">
-            <Link href="/submit">Submit a Receipt</Link>
-          </Button>
+        <div className="flex justify-center">
           <Button variant="outline" size="lg" asChild>
-            <Link href="#demo">View Demo</Link>
+            <Link href="#demo">View Live Claims</Link>
           </Button>
         </div>
       </section>
@@ -112,17 +105,7 @@ export default function Home() {
         <h2 className="text-3xl font-bold text-center text-slate-900 dark:text-white mb-8">
           Live Disagreements
         </h2>
-        <div className="text-center text-slate-600 dark:text-slate-400 mb-8">
-          <p>Demo claims will appear here once you connect a database.</p>
-          <p className="text-sm mt-2">
-            To see live data, complete the Supabase setup and run the seed script.
-          </p>
-        </div>
-        <div className="flex justify-center">
-          <Button asChild variant="outline">
-            <Link href="/submit">Submit Your First Receipt</Link>
-          </Button>
-        </div>
+        <LiveClaims />
       </section>
 
       {/* Footer */}
@@ -130,17 +113,11 @@ export default function Home() {
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-slate-600 dark:text-slate-400 mb-4 md:mb-0">
-              © 2024 GetReceipts.org - Built for transparent discourse
+              © 2025 GetReceipts.org
             </div>
             <div className="flex space-x-6">
-              <Link href="/submit" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
-                Submit
-              </Link>
-              <Link href="https://github.com" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+              <Link href="https://github.com/msg43/GetReceipts" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
                 GitHub
-              </Link>
-              <Link href="/api/receipts" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
-                API
               </Link>
             </div>
           </div>
