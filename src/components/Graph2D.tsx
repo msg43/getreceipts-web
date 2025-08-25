@@ -80,10 +80,19 @@ function GraphLoader({ data, selectedNodeId }: { data: GraphData; selectedNodeId
     
     // Fit graph to viewport after loading
     setTimeout(() => {
-      if (sigma && !selectedNodeId) {
-        sigma.getCamera().setState({ ratio: 1.2 });
+      if (sigma) {
+        if (!selectedNodeId) {
+          // Fit the whole graph in view
+          sigma.getCamera().setState({ x: 0, y: 0, ratio: 0.8 });
+        } else {
+          // Center on selected node
+          const nodePosition = sigma.getNodeDisplayData(selectedNodeId);
+          if (nodePosition) {
+            sigma.getCamera().animate(nodePosition, { duration: 500 });
+          }
+        }
       }
-    }, 100);
+    }, 200);
 
     // Handle selection highlighting
     if (selectedNodeId && graph.hasNode(selectedNodeId)) {

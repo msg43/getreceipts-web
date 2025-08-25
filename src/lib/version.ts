@@ -18,11 +18,19 @@ interface VersionConfig {
 let cachedVersion: string | null = null;
 
 export function getVersion(): string {
+  // Return cached version if available
   if (cachedVersion) {
     return cachedVersion;
   }
 
+  // Return fallback version if running in browser
+  if (typeof window !== 'undefined') {
+    cachedVersion = 'v1.0.0.0';
+    return cachedVersion;
+  }
+
   try {
+    // Only attempt file read on server-side
     const versionPath = join(process.cwd(), 'version.toml');
     const versionContent = readFileSync(versionPath, 'utf-8');
     const config = TOML.parse(versionContent) as VersionConfig;
@@ -33,7 +41,8 @@ export function getVersion(): string {
     return cachedVersion;
   } catch (error) {
     console.warn('Could not read version.toml, using fallback version');
-    return 'v1.0.0.0';
+    cachedVersion = 'v1.0.0.0';
+    return cachedVersion;
   }
 }
 

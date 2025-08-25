@@ -3,11 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import LiveClaims from "@/components/LiveClaims";
 import { getVersion } from "@/lib/version";
+import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
+import { Suspense } from "react";
 
 export default function SkipThePodcastHomepage() {
   const version = getVersion();
   
   return (
+    <GlobalErrorBoundary>
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 dark:from-blue-900 dark:to-slate-800">
       {/* Header */}
       <header className="border-b bg-white/80 dark:bg-blue-900/80 backdrop-blur-sm">
@@ -169,7 +172,13 @@ export default function SkipThePodcastHomepage() {
         <p className="text-center text-blue-600 dark:text-blue-400 mb-8">
           The substance without the 3-hour commitment
         </p>
-        <LiveClaims />
+        <Suspense fallback={
+          <div className="text-center text-blue-600 dark:text-blue-400">
+            <p>Loading claims...</p>
+          </div>
+        }>
+          <LiveClaims />
+        </Suspense>
       </section>
 
       {/* Call to Action */}
@@ -205,5 +214,6 @@ export default function SkipThePodcastHomepage() {
         </div>
       </footer>
     </div>
+    </GlobalErrorBoundary>
   );
 }

@@ -63,48 +63,32 @@ export default function GraphPage() {
   useEffect(() => {
     // Only select initial node if we have data, no current selection, and user hasn't interacted
     if (data.nodes.length > 0 && !selection.nodeId && !hasUserInteracted) {
-      // Try to find a node near the center of the graph
-      // First, calculate the center of all nodes
-      const centerX = data.nodes.reduce((sum, node) => sum + (node.x || 0), 0) / data.nodes.length;
-      const centerY = data.nodes.reduce((sum, node) => sum + (node.y || 0), 0) / data.nodes.length;
+      // Count edges for each node to find the most connected one
+      const edgeCounts = new Map<string, number>();
+      data.edges.forEach(edge => {
+        edgeCounts.set(edge.source, (edgeCounts.get(edge.source) || 0) + 1);
+        edgeCounts.set(edge.target, (edgeCounts.get(edge.target) || 0) + 1);
+      });
       
-      // Find the node closest to the center
-      let closestNode = data.nodes[0];
-      let minDistance = Infinity;
+      // Find the node with the most connections
+      let selectedNode = data.nodes[0];
+      let maxEdges = 0;
       
       data.nodes.forEach(node => {
-        const distance = Math.sqrt(
-          Math.pow((node.x || 0) - centerX, 2) + 
-          Math.pow((node.y || 0) - centerY, 2)
-        );
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestNode = node;
+        const edgeCount = edgeCounts.get(node.id) || 0;
+        if (edgeCount > maxEdges) {
+          maxEdges = edgeCount;
+          selectedNode = node;
         }
       });
       
-      // If we don't have position data, just pick a node with high connectivity
-      if (!closestNode.x && !closestNode.y) {
-        // Count edges for each node
-        const edgeCounts = new Map<string, number>();
-        data.edges.forEach(edge => {
-          edgeCounts.set(edge.source, (edgeCounts.get(edge.source) || 0) + 1);
-          edgeCounts.set(edge.target, (edgeCounts.get(edge.target) || 0) + 1);
-        });
-        
-        // Find the node with the most connections
-        let maxEdges = 0;
-        data.nodes.forEach(node => {
-          const edgeCount = edgeCounts.get(node.id) || 0;
-          if (edgeCount > maxEdges) {
-            maxEdges = edgeCount;
-            closestNode = node;
-          }
-        });
+      // If all nodes have 0 connections, pick a random one from the middle of the array
+      if (maxEdges === 0 && data.nodes.length > 0) {
+        selectedNode = data.nodes[Math.floor(data.nodes.length / 2)];
       }
       
       // Select the initial node without marking as user interaction
-      setSelection({ nodeId: closestNode.id, node: closestNode });
+      setSelection({ nodeId: selectedNode.id, node: selectedNode });
     }
   }, [data.nodes, data.edges, selection.nodeId, hasUserInteracted]); // Dependencies for initial selection
 

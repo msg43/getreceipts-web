@@ -26,9 +26,9 @@ export function middleware(request: NextRequest) {
   if (request.nextUrl.pathname === '/') {
     const url = request.nextUrl.clone();
     
-    // Route skipthepodcast.com to the graph page
+    // Route skipthepodcast.com to its dedicated homepage
     if (hostname.includes('skipthepodcast.com')) {
-      url.pathname = '/graph';
+      url.pathname = '/homepage/skipthepodcast';
       return NextResponse.rewrite(url, {
         request: {
           headers: requestHeaders,
@@ -37,7 +37,7 @@ export function middleware(request: NextRequest) {
     }
     
     // Route other non-default themes to domain-specific homepage
-    if (domainConfig.theme !== 'default' && !hostname.includes('skipthepodcast.com')) {
+    if (domainConfig.theme !== 'default') {
       url.pathname = `/homepage/${domainConfig.theme}`;
       return NextResponse.rewrite(url, {
         request: {

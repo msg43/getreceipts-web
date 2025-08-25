@@ -31,30 +31,79 @@ export default function LiveClaims() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+    
     async function fetchClaims() {
       try {
-        // Fetch claims from the API
-        const response = await fetch('/api/claims');
+        // Fetch claims from the API with timeout
+        const response = await fetch('/api/claims', {
+          signal: controller.signal,
+          // Add cache control for better performance
+          cache: 'no-cache',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch claims');
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
         const data = await response.json();
         setClaims(data.claims || []);
-      } catch (err) {
-        console.error('Error fetching claims:', err);
-        setError('Failed to load claims');
+      } catch (err: any) {
+        if (err.name === 'AbortError') {
+          console.log('Fetch aborted');
+        } else {
+          console.error('Error fetching claims:', err);
+          setError('Unable to load claims. Please try again later.');
+        }
       } finally {
         setLoading(false);
       }
     }
 
+    // Add a timeout to prevent hanging on mobile
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+      setError('Request timed out. Please check your connection.');
+      setLoading(false);
+    }, 10000); // 10 second timeout
+
     fetchClaims();
+
+    return () => {
+      controller.abort();
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   if (loading) {
     return (
-      <div className="text-center text-slate-600 dark:text-slate-400">
-        <p>Loading claims...</p>
+      <div className="space-y-4">
+        {/* Skeleton loader for better mobile UX */}
+        {[1, 2, 3].map((i) => (
+          <Card key={i} className="animate-pulse">
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                  <div className="flex gap-1">
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                  </div>
+                </div>
+                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="flex items-center justify-between">
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-40"></div>
+                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     );
   }

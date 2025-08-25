@@ -3,11 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import LiveClaims from "@/components/LiveClaims";
 import { getVersion } from "@/lib/version";
+import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
+import { Suspense } from "react";
 
 export default function Home() {
   const version = getVersion();
   
   return (
+    <GlobalErrorBoundary>
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
       <header className="border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
@@ -108,7 +111,13 @@ export default function Home() {
         <h2 className="text-3xl font-bold text-center text-slate-900 dark:text-white mb-8">
           Live Disagreements
         </h2>
-        <LiveClaims />
+        <Suspense fallback={
+          <div className="text-center text-slate-600 dark:text-slate-400">
+            <p>Loading claims...</p>
+          </div>
+        }>
+          <LiveClaims />
+        </Suspense>
       </section>
 
       {/* Footer */}
@@ -125,5 +134,6 @@ export default function Home() {
         </div>
       </footer>
     </div>
+    </GlobalErrorBoundary>
   );
 }
