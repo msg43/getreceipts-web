@@ -51,8 +51,8 @@ export default function LiveClaims() {
         
         const data = await response.json();
         setClaims(data.claims || []);
-      } catch (err: any) {
-        if (err.name === 'AbortError') {
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') {
           console.log('Fetch aborted');
         } else {
           console.error('Error fetching claims:', err);
@@ -87,19 +87,19 @@ export default function LiveClaims() {
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                  <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded w-3/4 mb-2"></div>
                   <div className="flex gap-1">
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-16"></div>
+                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-16"></div>
                   </div>
                 </div>
-                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-24"></div>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
               <div className="flex items-center justify-between">
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-40"></div>
-                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-40"></div>
+                <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded w-24"></div>
               </div>
             </CardContent>
           </Card>

@@ -30,7 +30,7 @@ export default function SubmitPage(){
         {result?.url && <a className="px-4 py-2 border rounded underline" href={result.url}>Open Claim</a>}
       </div>
       {error && <pre className="text-red-600 text-sm whitespace-pre-wrap">{error}</pre>}
-      {result && <pre className="text-xs bg-gray-50 p-3 rounded border mt-2">{JSON.stringify(result, null, 2)}</pre>}
+      {result && <pre className="text-xs bg-slate-50 p-3 rounded border mt-2">{JSON.stringify(result, null, 2)}</pre>}
     </div>
   );
 }

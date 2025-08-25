@@ -140,12 +140,12 @@ export default function GraphPage() {
   }, [navigateNodes, clearSelection, toggleMode]);
 
   return (
-    <div className="h-screen bg-gray-100 p-4">
+    <div className="h-screen bg-slate-100 p-4">
       <div className="h-full">
         {/* Header */}
         <div className="mb-4">
-          <h1 className="text-3xl font-bold text-gray-900">Claims Graph Explorer</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-3xl font-bold text-slate-900">Claims Graph Explorer</h1>
+          <p className="text-slate-600 mt-1">
             Explore relationships between claims • Use filters to focus • Click nodes for details
           </p>
         </div>
@@ -200,7 +200,7 @@ export default function GraphPage() {
         </div>
 
         {/* Keyboard shortcuts hint */}
-        <div className="fixed bottom-4 right-4 bg-gray-800 text-white text-xs rounded-lg px-3 py-2 opacity-50 hover:opacity-100 transition-opacity">
+        <div className="fixed bottom-4 right-4 bg-slate-800 text-white text-xs rounded-lg px-3 py-2 opacity-50 hover:opacity-100 transition-opacity">
           <span className="font-mono">j/k</span> navigate • 
           <span className="font-mono ml-2">m</span> toggle mode • 
           <span className="font-mono ml-2">/</span> search • 

@@ -136,7 +136,7 @@ export default function CommentsSection({ claimId: _claimId, initialComments = [
         
         {/* Comments List */}
         {topLevelComments.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-slate-500">
             No comments yet. Be the first to share your thoughts!
           </div>
         ) : (
@@ -152,7 +152,7 @@ export default function CommentsSection({ claimId: _claimId, initialComments = [
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-sm">{comment.author}</span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-slate-500">
                           {formatDate(comment.createdAt)}
                         </span>
                       </div>
@@ -218,7 +218,7 @@ export default function CommentsSection({ claimId: _claimId, initialComments = [
                 
                 {/* Replies */}
                 {getCommentReplies(comment.id).map((reply) => (
-                  <div key={reply.id} className="ml-8 border-l-2 border-gray-200 pl-4">
+                  <div key={reply.id} className="ml-8 border-l-2 border-slate-200 pl-4">
                     <div className="border rounded-lg p-3 space-y-2">
                       <div className="flex items-start gap-3">
                         <Avatar className="w-6 h-6">
@@ -227,7 +227,7 @@ export default function CommentsSection({ claimId: _claimId, initialComments = [
                         <div className="flex-1 space-y-1">
                           <div className="flex items-center gap-2">
                             <span className="font-medium text-sm">{reply.author}</span>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-slate-500">
                               {formatDate(reply.createdAt)}
                             </span>
                           </div>

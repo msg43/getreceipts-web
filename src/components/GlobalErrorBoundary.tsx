@@ -34,7 +34,7 @@ export default class GlobalErrorBoundary extends React.Component<
             <CardHeader>
               <CardTitle className="text-red-600">Something went wrong</CardTitle>
               <CardDescription>
-                We're sorry, but something unexpected happened. This error has been logged.
+                We&apos;re sorry, but something unexpected happened. This error has been logged.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

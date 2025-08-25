@@ -11,8 +11,8 @@ const Graph2D = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="h-full w-full bg-gray-50 rounded-lg flex items-center justify-center">
-        <div className="text-gray-500">Loading 2D graph...</div>
+      <div className="h-full w-full bg-slate-50 rounded-lg flex items-center justify-center">
+        <div className="text-slate-500">Loading 2D graph...</div>
       </div>
     )
   }

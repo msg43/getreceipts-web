@@ -174,7 +174,7 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
               {c.text_long && (
                 <div className="mt-4 pt-4 border-t">
                   <h3 className="font-medium mb-2">Detailed Analysis</h3>
-                  <p className="text-gray-700">{c.text_long}</p>
+                  <p className="text-slate-700">{c.text_long}</p>
                 </div>
               )}
             </div>
@@ -211,7 +211,7 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
                   <a className="underline" target="_blank" href={s.url ?? "#"} rel="noopener noreferrer">
                     {s.title ?? s.url}
                   </a>
-                  {s.type && <span className="ml-2 text-xs text-gray-500">({s.type})</span>}
+                  {s.type && <span className="ml-2 text-xs text-slate-500">({s.type})</span>}
                 </li>
               ))}
             </ul>
@@ -259,7 +259,7 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
                   <a href={`/claim/${rel.to_claim?.slug}`} className="text-blue-600 hover:underline flex-1">
                     {rel.to_claim?.text_short || 'Related claim'}
                   </a>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-slate-500">
                     {Math.round(Number(rel.strength || 0.5) * 100)}% confidence
                   </span>
                 </div>
@@ -280,10 +280,10 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
     return (
       <div className="p-8 text-center">
         <h1 className="text-2xl font-semibold text-red-600 mb-4">Error Loading Claim</h1>
-        <p className="text-gray-600 mb-4">
+        <p className="text-slate-600 mb-4">
           There was an error loading this claim page. This might be due to:
         </p>
-        <ul className="text-left max-w-md mx-auto text-gray-600 mb-6">
+        <ul className="text-left max-w-md mx-auto text-slate-600 mb-6">
           <li>• Database connection issues</li>
           <li>• Missing environment variables</li>
           <li>• Invalid claim ID</li>

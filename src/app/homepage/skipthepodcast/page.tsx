@@ -75,7 +75,7 @@ export default function SkipThePodcastHomepage() {
               </p>
               <p className="flex items-center gap-3">
                 <span className="text-red-500">❌</span>
-                Lost in the host's personality and tangents
+                Lost in the host&apos;s personality and tangents
               </p>
             </div>
           </div>
@@ -122,7 +122,7 @@ export default function SkipThePodcastHomepage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-blue-600 dark:text-blue-400">
-                Whether it's a 4-hour Joe Rogan episode or a 2-hour academic debate, 
+                Whether it&apos;s a 4-hour Joe Rogan episode or a 2-hour academic debate, 
                 we extract the verifiable claims that actually matter.
               </p>
             </CardContent>
@@ -140,7 +140,7 @@ export default function SkipThePodcastHomepage() {
             <CardContent>
               <p className="text-sm text-blue-600 dark:text-blue-400">
                 Every claim gets the receipt treatment - real sources, expert positions, 
-                and consensus tracking from people who actually know what they're talking about.
+                and consensus tracking from people who actually know what they&apos;re talking about.
               </p>
             </CardContent>
           </Card>
@@ -187,7 +187,7 @@ export default function SkipThePodcastHomepage() {
           Ready to Skip the Fluff?
         </h2>
         <p className="text-xl text-blue-700 dark:text-blue-300 mb-8">
-          Join thousands who've discovered they can get better insights in 5 minutes 
+          Join thousands who&apos;ve discovered they can get better insights in 5 minutes 
           than from hours of unfocused rambling.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">

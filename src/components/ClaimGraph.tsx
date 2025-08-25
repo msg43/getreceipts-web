@@ -233,7 +233,7 @@ export default function ClaimGraph({ claimId, height = 600 }: ClaimGraphProps) {
           <CardTitle>🕸️ Claims Network</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-gray-500 text-center py-8">
+          <p className="text-slate-500 text-center py-8">
             No claim relationships to display yet.
           </p>
         </CardContent>
@@ -276,7 +276,7 @@ export default function ClaimGraph({ claimId, height = 600 }: ClaimGraphProps) {
           </div>
           
           {selectedNode && (
-            <div className="mt-4 p-4 border rounded-lg bg-gray-50">
+            <div className="mt-4 p-4 border rounded-lg bg-slate-50">
               <h4 className="font-semibold mb-2">Selected Claim</h4>
               <p className="text-sm mb-2">{selectedNode.text}</p>
               <div className="flex gap-2">

@@ -41,7 +41,7 @@ export function Graph3D({ data, selectedNodeId, onNodeSelect }: Graph3DProps) {
       onNodeSelect(node.id, node as Node);
       // Center camera on clicked node
       if (fgRef.current) {
-        const distance = 200;
+        const distance = 400;
         const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
         fgRef.current.cameraPosition(
           { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
@@ -89,7 +89,7 @@ export function Graph3D({ data, selectedNodeId, onNodeSelect }: Graph3DProps) {
         // Small delay to ensure the graph is ready
         setTimeout(() => {
           if (fgRef.current && selectedNode) {
-            const distance = 200;
+            const distance = 400;
             const distRatio = 1 + distance / Math.hypot(selectedNode.x || 0, selectedNode.y || 0, selectedNode.z || 0);
             fgRef.current.cameraPosition(
               { 
@@ -109,17 +109,18 @@ export function Graph3D({ data, selectedNodeId, onNodeSelect }: Graph3DProps) {
   // Initial camera setup when graph loads
   useEffect(() => {
     if (fgRef.current && graphData.nodes.length > 0) {
-      // Give the graph time to initialize
+      // Give the graph time to initialize and position nodes
       setTimeout(() => {
         if (fgRef.current) {
-          fgRef.current.zoomToFit(400, 50);
+          // Zoom out to show the entire graph with padding
+          fgRef.current.zoomToFit(1000, 200);
         }
-      }, 500);
+      }, 1500);
     }
   }, [graphData.nodes.length]);
 
   return (
-    <div className="h-full w-full bg-gray-900 rounded-lg overflow-hidden">
+    <div className="h-full w-full bg-slate-900 rounded-lg overflow-hidden">
       <ForceGraph3D
         ref={fgRef}
         graphData={graphData}
@@ -144,17 +145,18 @@ export function Graph3D({ data, selectedNodeId, onNodeSelect }: Graph3DProps) {
         warmupTicks={100}
         cooldownTicks={0}
         d3Force="center"
+        cameraPosition={{ x: 0, y: 0, z: 1000 }}
         onEngineStop={() => {
           // Once the force simulation has settled, adjust camera
           if (fgRef.current) {
             // If no node is selected, show the full graph
             if (!selectedNodeId) {
-              fgRef.current.zoomToFit(400, 50);
+              fgRef.current.zoomToFit(1000, 200);
             } else {
               // If a node is selected, ensure we're centered on it
               const selectedNode = graphData.nodes.find(n => n.id === selectedNodeId);
               if (selectedNode && selectedNode.x !== undefined) {
-                const distance = 200;
+                const distance = 400;
                 const distRatio = 1 + distance / Math.hypot(selectedNode.x || 0, selectedNode.y || 0, selectedNode.z || 0);
                 fgRef.current.cameraPosition(
                   { 

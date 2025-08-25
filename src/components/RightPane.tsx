@@ -12,7 +12,7 @@ export function RightPane({ selectedNode, onClose }: RightPaneProps) {
   if (!selectedNode) {
     return (
       <div className="h-full bg-white rounded-lg shadow-md p-6 flex items-center justify-center">
-        <p className="text-gray-500 text-center">
+        <p className="text-slate-500 text-center">
           Select a node to view details
         </p>
       </div>
@@ -23,12 +23,12 @@ export function RightPane({ selectedNode, onClose }: RightPaneProps) {
     <div className="h-full bg-white rounded-lg shadow-md p-6 overflow-y-auto">
       {/* Header */}
       <div className="flex justify-between items-start mb-6">
-        <h2 className="text-xl font-bold text-gray-900 pr-8">
+        <h2 className="text-xl font-bold text-slate-900 pr-8">
           {selectedNode.title}
         </h2>
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 transition-colors"
+          className="text-slate-400 hover:text-slate-600 transition-colors"
           aria-label="Close details"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,8 +40,8 @@ export function RightPane({ selectedNode, onClose }: RightPaneProps) {
       {/* Content */}
       {selectedNode.content && (
         <div className="mb-6">
-          <h3 className="text-sm font-medium text-gray-700 mb-2">Content</h3>
-          <p className="text-gray-600">{selectedNode.content}</p>
+          <h3 className="text-sm font-medium text-slate-700 mb-2">Content</h3>
+          <p className="text-slate-600">{selectedNode.content}</p>
         </div>
       )}
 
@@ -50,13 +50,13 @@ export function RightPane({ selectedNode, onClose }: RightPaneProps) {
         {/* Community */}
         {selectedNode.community !== undefined && (
           <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-1">Community</h3>
+            <h3 className="text-sm font-medium text-slate-700 mb-1">Community</h3>
             <div className="flex items-center">
               <span
                 className="w-3 h-3 rounded-full mr-2"
                 style={{ backgroundColor: selectedNode.color }}
               />
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-slate-600">
                 {getCommunityName(selectedNode.community)}
               </span>
             </div>
@@ -66,12 +66,12 @@ export function RightPane({ selectedNode, onClose }: RightPaneProps) {
         {/* Tags */}
         {selectedNode.tags && selectedNode.tags.length > 0 && (
           <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Tags</h3>
+            <h3 className="text-sm font-medium text-slate-700 mb-2">Tags</h3>
             <div className="flex flex-wrap gap-2">
               {selectedNode.tags.map(tag => (
                 <span
                   key={tag}
-                  className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs"
+                  className="px-2 py-1 bg-slate-100 text-slate-700 rounded-full text-xs"
                 >
                   {tag}
                 </span>
@@ -83,8 +83,8 @@ export function RightPane({ selectedNode, onClose }: RightPaneProps) {
         {/* Created Date */}
         {selectedNode.createdAt && (
           <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-1">Created</h3>
-            <p className="text-sm text-gray-600">
+            <h3 className="text-sm font-medium text-slate-700 mb-1">Created</h3>
+            <p className="text-sm text-slate-600">
               {new Date(selectedNode.createdAt).toLocaleDateString()}
             </p>
           </div>
@@ -92,16 +92,16 @@ export function RightPane({ selectedNode, onClose }: RightPaneProps) {
 
         {/* Node ID */}
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-1">ID</h3>
-          <p className="text-xs text-gray-500 font-mono break-all">{selectedNode.id}</p>
+          <h3 className="text-sm font-medium text-slate-700 mb-1">ID</h3>
+          <p className="text-xs text-slate-500 font-mono break-all">{selectedNode.id}</p>
         </div>
 
         {/* Additional Metadata */}
         {selectedNode.metadata && Object.keys(selectedNode.metadata).length > 0 && (
           <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Additional Info</h3>
-            <div className="bg-gray-50 rounded p-3">
-              <pre className="text-xs text-gray-600 overflow-x-auto">
+            <h3 className="text-sm font-medium text-slate-700 mb-2">Additional Info</h3>
+            <div className="bg-slate-50 rounded p-3">
+              <pre className="text-xs text-slate-600 overflow-x-auto">
                 {JSON.stringify(selectedNode.metadata, null, 2)}
               </pre>
             </div>

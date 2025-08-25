@@ -117,7 +117,7 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
 
       {/* Search */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-slate-700 mb-2">
           Search
         </label>
         <input
@@ -126,14 +126,14 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
           onChange={(e) => setLocalSearch(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
           placeholder="Search by title or content..."
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
       {/* Bookmarks */}
       <div className="mb-6 pb-6 border-b">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-medium text-gray-900">Bookmarks</h3>
+          <h3 className="font-medium text-slate-900">Bookmarks</h3>
           {selectedNodeId && (
             <button
               onClick={addBookmark}
@@ -145,12 +145,12 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
         </div>
         <div className="space-y-2">
           {bookmarks.length === 0 ? (
-            <p className="text-sm text-gray-500">No bookmarks yet</p>
+            <p className="text-sm text-slate-500">No bookmarks yet</p>
           ) : (
             bookmarks.map(bookmark => (
               <div
                 key={bookmark.id}
-                className="flex justify-between items-center p-2 bg-gray-50 rounded hover:bg-gray-100 group"
+                className="flex justify-between items-center p-2 bg-slate-50 rounded hover:bg-slate-100 group"
               >
                 <span 
                   className="text-sm truncate cursor-pointer flex-1"
@@ -177,7 +177,7 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
 
       {/* Show/Hide Controls */}
       <div className="mb-6 pb-6 border-b">
-        <h3 className="font-medium text-gray-900 mb-4">Show/Hide</h3>
+        <h3 className="font-medium text-slate-900 mb-4">Show/Hide</h3>
         <div className="space-y-2">
           <label className="flex items-center">
             <input
@@ -215,7 +215,7 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
         <div>
           <button
             onClick={() => setPeopleExpanded(!peopleExpanded)}
-            className="flex items-center justify-between w-full text-left font-medium text-gray-900 hover:text-gray-700"
+            className="flex items-center justify-between w-full text-left font-medium text-slate-900 hover:text-slate-700"
           >
             <span>People ({peopleNodes.length})</span>
             <svg 
@@ -230,13 +230,13 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
           {peopleExpanded && (
             <div className="mt-2 max-h-48 overflow-y-auto">
               {peopleNodes.length === 0 ? (
-                <p className="text-sm text-gray-500 py-2">No people found</p>
+                <p className="text-sm text-slate-500 py-2">No people found</p>
               ) : (
                 <div className="space-y-1">
                   {peopleNodes.map(node => (
                     <div
                       key={node.id}
-                      className="text-sm text-gray-600 py-1 px-2 hover:bg-gray-50 rounded cursor-pointer"
+                      className="text-sm text-slate-600 py-1 px-2 hover:bg-slate-50 rounded cursor-pointer"
                       onClick={() => onNodeSelect?.(node.id, node)}
                     >
                       {node.title}
@@ -252,7 +252,7 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
         <div>
           <button
             onClick={() => setSourcesExpanded(!sourcesExpanded)}
-            className="flex items-center justify-between w-full text-left font-medium text-gray-900 hover:text-gray-700"
+            className="flex items-center justify-between w-full text-left font-medium text-slate-900 hover:text-slate-700"
           >
             <span>Sources ({sourceNodes.length})</span>
             <svg 
@@ -267,13 +267,13 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
           {sourcesExpanded && (
             <div className="mt-2 max-h-48 overflow-y-auto">
               {sourceNodes.length === 0 ? (
-                <p className="text-sm text-gray-500 py-2">No sources found</p>
+                <p className="text-sm text-slate-500 py-2">No sources found</p>
               ) : (
                 <div className="space-y-1">
                   {sourceNodes.map(node => (
                     <div
                       key={node.id}
-                      className="text-sm text-gray-600 py-1 px-2 hover:bg-gray-50 rounded cursor-pointer"
+                      className="text-sm text-slate-600 py-1 px-2 hover:bg-slate-50 rounded cursor-pointer"
                       onClick={() => onNodeSelect?.(node.id, node)}
                     >
                       {node.title}
@@ -289,7 +289,7 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
         <div>
           <button
             onClick={() => setClaimsExpanded(!claimsExpanded)}
-            className="flex items-center justify-between w-full text-left font-medium text-gray-900 hover:text-gray-700"
+            className="flex items-center justify-between w-full text-left font-medium text-slate-900 hover:text-slate-700"
           >
             <span>Claims ({claimNodes.length})</span>
             <svg 
@@ -304,13 +304,13 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
           {claimsExpanded && (
             <div className="mt-2 max-h-48 overflow-y-auto">
               {claimNodes.length === 0 ? (
-                <p className="text-sm text-gray-500 py-2">No claims found</p>
+                <p className="text-sm text-slate-500 py-2">No claims found</p>
               ) : (
                 <div className="space-y-1">
                   {claimNodes.map(node => (
                     <div
                       key={node.id}
-                      className="text-sm text-gray-600 py-1 px-2 hover:bg-gray-50 rounded cursor-pointer"
+                      className="text-sm text-slate-600 py-1 px-2 hover:bg-slate-50 rounded cursor-pointer"
                       onClick={() => onNodeSelect?.(node.id, node)}
                     >
                       {node.title}
@@ -325,7 +325,7 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
 
       {/* Tags */}
       <div className="mt-6 pt-6 border-t">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-slate-700 mb-2">
           Filter by Tags
         </label>
         <div className="flex flex-wrap gap-2">
@@ -340,7 +340,7 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
               className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                 selectedTags.includes(tag)
                   ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
               {tag}
@@ -351,7 +351,7 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
 
       {/* Communities */}
       <div className="mt-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-slate-700 mb-2">
           Filter by Community
         </label>
         <div className="space-y-2">
@@ -389,7 +389,7 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
         </button>
         <button
           onClick={clearFilters}
-          className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+          className="flex-1 px-4 py-2 bg-slate-200 text-slate-700 rounded-md hover:bg-slate-300 transition-colors"
         >
           Clear
         </button>

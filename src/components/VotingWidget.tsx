@@ -94,7 +94,7 @@ export default function VotingWidget({
     return (
       <Card>
         <CardContent className="pt-4">
-          <div className="text-center text-gray-500">
+          <div className="text-center text-slate-500">
             <p className="text-sm mb-2">Community Feedback</p>
             <div className="flex justify-center gap-4">
               <Badge variant="outline">↑ {votes.upvotes}</Badge>
@@ -159,7 +159,7 @@ export default function VotingWidget({
           </div>
           
           {userVote && (
-            <p className="text-xs text-center text-gray-500">
+            <p className="text-xs text-center text-slate-500">
               You voted: {userVote.replace('_', ' ')}
             </p>
           )}
