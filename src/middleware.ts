@@ -26,8 +26,18 @@ export function middleware(request: NextRequest) {
   if (request.nextUrl.pathname === '/') {
     const url = request.nextUrl.clone();
     
-    // Route to domain-specific homepage
-    if (domainConfig.theme !== 'default') {
+    // Route skipthepodcast.com to the graph page
+    if (hostname.includes('skipthepodcast.com')) {
+      url.pathname = '/graph';
+      return NextResponse.rewrite(url, {
+        request: {
+          headers: requestHeaders,
+        },
+      });
+    }
+    
+    // Route other non-default themes to domain-specific homepage
+    if (domainConfig.theme !== 'default' && !hostname.includes('skipthepodcast.com')) {
       url.pathname = `/homepage/${domainConfig.theme}`;
       return NextResponse.rewrite(url, {
         request: {

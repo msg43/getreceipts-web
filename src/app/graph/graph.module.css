@@ -1,0 +1,76 @@
+/* graph.module.css - Graph-specific styles */
+
+/* Custom scrollbar styles */
+.customScrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.customScrollbar::-webkit-scrollbar-track {
+  @apply bg-gray-100 rounded;
+}
+
+.customScrollbar::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 rounded hover:bg-gray-500;
+}
+
+/* Firefox */
+.customScrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #9ca3af #f3f4f6;
+}
+
+/* Graph container styles */
+.sigmaContainer {
+  @apply rounded-lg overflow-hidden;
+}
+
+/* Force graph 3D styles */
+.forceGraph3dContainer {
+  @apply rounded-lg overflow-hidden;
+}
+
+/* Prevent text selection during graph interaction */
+.graphContainer {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Animation for loading spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animateSpin {
+  animation: spin 1s linear infinite;
+}
+
+/* Resizable panels styling */
+[data-panel-resize-handle-enabled] {
+  position: relative;
+  outline: none;
+}
+
+[data-panel-resize-handle-enabled]:hover {
+  background-color: rgba(59, 130, 246, 0.2);
+}
+
+[data-panel-resize-handle-enabled]:active {
+  background-color: rgba(59, 130, 246, 0.3);
+}
+
+[data-panel-resize-handle-enabled]::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 24px;
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 1px;
+}
