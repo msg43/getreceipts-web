@@ -156,7 +156,7 @@ export default function SkipThePodcastHomepage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-blue-600 dark:text-blue-400">
-                Visual consensus meters show you where there's real expert agreement 
+                Visual consensus meters show you where there&apos;s real expert agreement 
                 vs. where claims are disputed or lack evidence.
               </p>
             </CardContent>

@@ -39,18 +39,18 @@ export const domainConfigs: Record<string, DomainConfig> = {
   },
 };
 
-export function getDomainConfig(): DomainConfig {
-  const headersList = headers();
+export async function getDomainConfig(): Promise<DomainConfig> {
+  const headersList = await headers();
   const hostname = headersList.get('x-hostname') || headersList.get('host') || 'getreceipts.org';
   
   return domainConfigs[hostname] || domainConfigs['getreceipts.org'];
 }
 
-export function getBrandingFromHeaders(): {
+export async function getBrandingFromHeaders(): Promise<{
   theme: string;
   brand: string;
-} {
-  const headersList = headers();
+}> {
+  const headersList = await headers();
   
   return {
     theme: headersList.get('x-domain-theme') || 'default',

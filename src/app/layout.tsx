@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const domainConfig = getDomainConfig();
+  const domainConfig = await getDomainConfig();
   
   return {
     title: domainConfig.title,

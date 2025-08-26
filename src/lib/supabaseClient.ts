@@ -22,7 +22,35 @@ export const supabase = (supabaseUrl && supabaseAnonKey)
 
 // Type for the RPC function response
 export interface SubgraphResponse {
-  nodes: any[];
-  edges: any[];
-  clusters: any[];
+  nodes: Array<{
+    id: string;
+    slug: string;
+    label: string;
+    title: string;
+    content?: string;
+    x?: number;
+    y?: number;
+    size: number;
+    color: string;
+    community?: number;
+    tags: string[];
+    metadata: Record<string, string | number | boolean | null>;
+    createdAt: string;
+    type?: 'person' | 'source' | 'claim';
+  }>;
+  edges: Array<{
+    id: string;
+    source: string;
+    target: string;
+    type: 'supports' | 'refutes' | 'related';
+    weight: number;
+  }>;
+  clusters: Array<{
+    id: number;
+    name: string;
+    color: string;
+    x?: number;
+    y?: number;
+    nodeCount: number;
+  }>;
 }

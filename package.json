@@ -4,14 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "ts-node scripts/seed.ts",
-    "version:increment": "node scripts/increment-version.js",
+    "version:increment": "node scripts/increment-version.mjs",
     "push": "npm run version:increment && git add version.toml && git commit -m \"Auto-increment version [skip ci]\" && git push"
   },
   "dependencies": {

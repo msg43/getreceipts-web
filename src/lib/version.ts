@@ -33,13 +33,13 @@ export function getVersion(): string {
     // Only attempt file read on server-side
     const versionPath = join(process.cwd(), 'version.toml');
     const versionContent = readFileSync(versionPath, 'utf-8');
-    const config = TOML.parse(versionContent) as VersionConfig;
+    const config = TOML.parse(versionContent) as unknown as VersionConfig;
     
     const { major, minor, patch, build } = config.version;
     cachedVersion = `v${major}.${minor}.${patch}.${build}`;
     
     return cachedVersion;
-  } catch (error) {
+  } catch {
     console.warn('Could not read version.toml, using fallback version');
     cachedVersion = 'v1.0.0.0';
     return cachedVersion;

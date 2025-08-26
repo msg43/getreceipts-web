@@ -12,7 +12,7 @@ export interface Node {
   color: string;
   community?: number;
   tags: string[];
-  metadata: Record<string, any>;
+  metadata: Record<string, string | number | boolean | null>;
   createdAt: string;
   type?: 'person' | 'source' | 'claim';
 }
@@ -62,6 +62,7 @@ export interface Bookmark {
 
 // For 3D graph positioning
 export interface Node3D extends Node {
+  z?: number;
   fx?: number;
   fy?: number;
   fz?: number;

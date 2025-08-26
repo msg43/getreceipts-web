@@ -4,6 +4,26 @@ import React, { useCallback, useRef, useMemo, useEffect, useState } from 'react'
 import ForceGraph3D from 'react-force-graph-3d';
 import type { GraphData, Node, Node3D } from '@/lib/types';
 
+// Types for the force graph library
+interface ForceNode extends Node3D {
+  x?: number;
+  y?: number;
+  z?: number;
+  vx?: number;
+  vy?: number;
+  vz?: number;
+}
+
+interface ForceLink {
+  source: string | ForceNode;
+  target: string | ForceNode;
+  type: 'supports' | 'refutes' | 'related';
+  weight: number;
+  color: string;
+  opacity: number;
+  width: number;
+}
+
 interface Graph3DProps {
   data: GraphData;
   selectedNodeId: string | null;
@@ -11,7 +31,8 @@ interface Graph3DProps {
 }
 
 export function Graph3D({ data, selectedNodeId, onNodeSelect }: Graph3DProps) {
-  const fgRef = useRef<any>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const fgRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hasFittedRef = useRef<boolean>(false);
   const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
@@ -42,11 +63,11 @@ export function Graph3D({ data, selectedNodeId, onNodeSelect }: Graph3DProps) {
   }, [data]);
 
   // Handle node clicks
-  const handleNodeClick = useCallback((node: any) => {
+  const handleNodeClick = useCallback((node: ForceNode) => {
     if (node) {
       onNodeSelect(node.id, node as Node);
       // Center camera on clicked node
-      if (fgRef.current) {
+      if (fgRef.current && node.x !== undefined && node.y !== undefined && node.z !== undefined) {
         const distance = 200;
         const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
         fgRef.current.cameraPosition(
@@ -64,7 +85,7 @@ export function Graph3D({ data, selectedNodeId, onNodeSelect }: Graph3DProps) {
   }, [onNodeSelect]);
 
   // Node coloring based on selection
-  const nodeColor = useCallback((node: any) => {
+  const nodeColor = useCallback((node: ForceNode) => {
     if (selectedNodeId === node.id) return '#FBBF24';
     if (selectedNodeId) {
       // Check if neighbor
@@ -81,9 +102,11 @@ export function Graph3D({ data, selectedNodeId, onNodeSelect }: Graph3DProps) {
   }, [selectedNodeId, data.edges]);
 
   // Link visibility based on selection
-  const linkVisibility = useCallback((link: any) => {
+  const linkVisibility = useCallback((link: ForceLink) => {
     if (!selectedNodeId) return true;
-    return link.source.id === selectedNodeId || link.target.id === selectedNodeId;
+    const sourceId = typeof link.source === 'string' ? link.source : link.source.id;
+    const targetId = typeof link.target === 'string' ? link.target : link.target.id;
+    return sourceId === selectedNodeId || targetId === selectedNodeId;
   }, [selectedNodeId]);
 
   // Center camera on selected node after the initial fit
@@ -102,15 +125,17 @@ export function Graph3D({ data, selectedNodeId, onNodeSelect }: Graph3DProps) {
         (selectedNode.y || 0),
         (selectedNode.z || 0)
       );
-      fgRef.current.cameraPosition(
-        {
-          x: (selectedNode.x || 0) * distRatio,
-          y: (selectedNode.y || 0) * distRatio,
-          z: (selectedNode.z || 0) * distRatio,
-        },
-        selectedNode,
-        800
-      );
+      if (fgRef.current) {
+        fgRef.current.cameraPosition(
+          {
+            x: (selectedNode.x || 0) * distRatio,
+            y: (selectedNode.y || 0) * distRatio,
+            z: (selectedNode.z || 0) * distRatio,
+          },
+          selectedNode,
+          800
+        );
+      }
     }, 200);
 
     return () => clearTimeout(timeout);
@@ -167,8 +192,7 @@ export function Graph3D({ data, selectedNodeId, onNodeSelect }: Graph3DProps) {
           d3VelocityDecay={0.3}
           warmupTicks={100}
           cooldownTicks={0}
-          d3Force="center"
-        onEngineStop={() => {
+          onEngineStop={() => {
           if (!fgRef.current) return;
 
           // First time the engine stops: fit the entire graph, once

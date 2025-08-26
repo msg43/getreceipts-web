@@ -109,7 +109,7 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
       showSources,
       showClaims,
     });
-  }, [showPeople, showSources, showClaims]);
+  }, [filters, onFiltersChange, showPeople, showSources, showClaims]);
 
   return (
     <div className="h-full bg-white rounded-lg shadow-md p-6 overflow-y-auto">

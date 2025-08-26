@@ -93,15 +93,15 @@ export default function GraphPage() {
   }, [data.nodes, data.edges, selection.nodeId, hasUserInteracted]); // Dependencies for initial selection
 
   // Clear selection
-  const clearSelection = () => {
+  const clearSelection = React.useCallback(() => {
     setSelection({ nodeId: null, node: null });
     setHasUserInteracted(true);
-  };
+  }, []);
 
   // Toggle between 2D and 3D
-  const toggleMode = () => {
+  const toggleMode = React.useCallback(() => {
     setMode(prev => prev === '2D' ? '3D' : '2D');
-  };
+  }, []);
 
   // Navigate to next/previous node
   const navigateNodes = React.useCallback((direction: 'next' | 'prev') => {
