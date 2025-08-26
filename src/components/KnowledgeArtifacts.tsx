@@ -89,7 +89,7 @@ export default function KnowledgeArtifacts({ people, jargon, models }: Knowledge
                   )}
                 </div>
                 {person.bio && (
-                  <p className="text-sm text-gray-600">{person.bio}</p>
+                  <p className="text-sm text-slate-600">{person.bio}</p>
                 )}
                 {person.expertise && person.expertise.length > 0 && (
                   <div className="flex flex-wrap gap-1">
@@ -102,10 +102,10 @@ export default function KnowledgeArtifacts({ people, jargon, models }: Knowledge
                 )}
                 {person.sources && person.sources.length > 0 && (
                   <div className="space-y-1">
-                    <span className="text-xs font-medium text-gray-500">Sources:</span>
+                    <span className="text-xs font-medium text-slate-500">Sources:</span>
                     <div className="text-xs space-y-1">
                       {person.sources.map((source, idx) => (
-                        <div key={idx} className="text-gray-600">• {source}</div>
+                        <div key={idx} className="text-slate-600">• {source}</div>
                       ))}
                     </div>
                   </div>
@@ -126,17 +126,17 @@ export default function KnowledgeArtifacts({ people, jargon, models }: Knowledge
                 <p className="text-sm">{term.definition}</p>
                 {term.examples && term.examples.length > 0 && (
                   <div className="space-y-1">
-                    <span className="text-xs font-medium text-gray-500">Examples:</span>
+                    <span className="text-xs font-medium text-slate-500">Examples:</span>
                     <ul className="text-xs space-y-1">
                       {term.examples.map((example, idx) => (
-                        <li key={idx} className="text-gray-600">• {example}</li>
+                        <li key={idx} className="text-slate-600">• {example}</li>
                       ))}
                     </ul>
                   </div>
                 )}
                 {term.related_terms && term.related_terms.length > 0 && (
                   <div className="flex flex-wrap gap-1">
-                    <span className="text-xs font-medium text-gray-500">Related:</span>
+                    <span className="text-xs font-medium text-slate-500">Related:</span>
                     {term.related_terms.map((related, idx) => (
                       <Badge key={idx} variant="secondary" className="text-xs">
                         {related}
@@ -160,7 +160,7 @@ export default function KnowledgeArtifacts({ people, jargon, models }: Knowledge
                 <p className="text-sm">{model.description}</p>
                 {model.key_concepts && model.key_concepts.length > 0 && (
                   <div className="space-y-1">
-                    <span className="text-xs font-medium text-gray-500">Key Concepts:</span>
+                    <span className="text-xs font-medium text-slate-500">Key Concepts:</span>
                     <div className="flex flex-wrap gap-1">
                       {model.key_concepts.map((concept, idx) => (
                         <Badge key={idx} variant="secondary" className="text-xs">
@@ -172,10 +172,10 @@ export default function KnowledgeArtifacts({ people, jargon, models }: Knowledge
                 )}
                 {model.relationships && Array.isArray(model.relationships) && model.relationships.length > 0 && (
                   <div className="space-y-1">
-                    <span className="text-xs font-medium text-gray-500">Relationships:</span>
+                    <span className="text-xs font-medium text-slate-500">Relationships:</span>
                     <div className="text-xs space-y-1">
                       {model.relationships.map((rel: Relationship, idx: number) => (
-                        <div key={idx} className="text-gray-600">
+                        <div key={idx} className="text-slate-600">
                           {rel.from} <span className="text-blue-600">{rel.type}</span> {rel.to}
                         </div>
                       ))}

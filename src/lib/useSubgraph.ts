@@ -1,0 +1,59 @@
+// useSubgraph.ts - Hook for fetching graph data
+
+import { useEffect, useState } from 'react';
+import { supabase } from './supabaseClient';
+import type { GraphData, Filters } from './types';
+
+export function useSubgraph(filters: Filters) {
+  const [data, setData] = useState<GraphData>({
+    nodes: [],
+    edges: [],
+    clusters: []
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchSubgraph() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Check if Supabase is configured
+        if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+          throw new Error('Supabase credentials not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env.local file.');
+        }
+
+        // Call the RPC function
+        const { data: result, error: rpcError } = await supabase.rpc('get_subgraph', {
+          filters: filters
+        });
+
+        if (rpcError) {
+          console.error('RPC Error:', rpcError);
+          if (rpcError.code === '42883') {
+            throw new Error('The get_subgraph function does not exist in your database. Please run the SQL setup scripts.');
+          }
+          throw new Error(`Database error: ${rpcError.message}`);
+        }
+
+        if (result) {
+          setData({
+            nodes: result.nodes || [],
+            edges: result.edges || [],
+            clusters: result.clusters || []
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching subgraph:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch graph data');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchSubgraph();
+  }, [filters]);
+
+  return { data, loading, error };
+}

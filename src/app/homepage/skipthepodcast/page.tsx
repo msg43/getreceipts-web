@@ -3,11 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import LiveClaims from "@/components/LiveClaims";
 import { getVersion } from "@/lib/version";
+import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
+import { Suspense } from "react";
 
 export default function SkipThePodcastHomepage() {
   const version = getVersion();
   
   return (
+    <GlobalErrorBoundary>
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 dark:from-blue-900 dark:to-slate-800">
       {/* Header */}
       <header className="border-b bg-white/80 dark:bg-blue-900/80 backdrop-blur-sm">
@@ -72,7 +75,7 @@ export default function SkipThePodcastHomepage() {
               </p>
               <p className="flex items-center gap-3">
                 <span className="text-red-500">❌</span>
-                Lost in the host's personality and tangents
+                Lost in the host&apos;s personality and tangents
               </p>
             </div>
           </div>
@@ -119,7 +122,7 @@ export default function SkipThePodcastHomepage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-blue-600 dark:text-blue-400">
-                Whether it's a 4-hour Joe Rogan episode or a 2-hour academic debate, 
+                Whether it&apos;s a 4-hour Joe Rogan episode or a 2-hour academic debate, 
                 we extract the verifiable claims that actually matter.
               </p>
             </CardContent>
@@ -137,7 +140,7 @@ export default function SkipThePodcastHomepage() {
             <CardContent>
               <p className="text-sm text-blue-600 dark:text-blue-400">
                 Every claim gets the receipt treatment - real sources, expert positions, 
-                and consensus tracking from people who actually know what they're talking about.
+                and consensus tracking from people who actually know what they&apos;re talking about.
               </p>
             </CardContent>
           </Card>
@@ -169,7 +172,13 @@ export default function SkipThePodcastHomepage() {
         <p className="text-center text-blue-600 dark:text-blue-400 mb-8">
           The substance without the 3-hour commitment
         </p>
-        <LiveClaims />
+        <Suspense fallback={
+          <div className="text-center text-blue-600 dark:text-blue-400">
+            <p>Loading claims...</p>
+          </div>
+        }>
+          <LiveClaims />
+        </Suspense>
       </section>
 
       {/* Call to Action */}
@@ -178,7 +187,7 @@ export default function SkipThePodcastHomepage() {
           Ready to Skip the Fluff?
         </h2>
         <p className="text-xl text-blue-700 dark:text-blue-300 mb-8">
-          Join thousands who've discovered they can get better insights in 5 minutes 
+          Join thousands who&apos;ve discovered they can get better insights in 5 minutes 
           than from hours of unfocused rambling.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -205,5 +214,6 @@ export default function SkipThePodcastHomepage() {
         </div>
       </footer>
     </div>
+    </GlobalErrorBoundary>
   );
 }
