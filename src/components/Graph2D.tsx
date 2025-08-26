@@ -142,6 +142,8 @@ export function Graph2D({ data, selectedNodeId, onNodeSelect }: Graph2DProps) {
     labelWeight: 'bold',
     labelColor: { color: '#374151' },
     defaultNodeType: 'circle',
+    // Allow invalid container to prevent initialization errors
+    allowInvalidContainer: true,
     // Removed defaultEdgeType as it was causing issues
     edgeReducer: (edge: string, data: { color: string; [key: string]: unknown }) => {
       // Reduce edge opacity for better visibility
