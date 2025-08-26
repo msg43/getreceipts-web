@@ -24,12 +24,22 @@ export function useSubgraph(filters: Filters) {
           throw new Error('Supabase credentials not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env.local file.');
         }
 
-        console.log('🔧 Calling get_subgraph with filters:', filters);
-        console.log('🔧 Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+        // Only use server-side filter properties (not client-side display properties)
+        const serverFilters = {
+          search: filters.search,
+          tags: filters.tags,
+          timeStart: filters.timeStart,
+          timeEnd: filters.timeEnd,
+          communities: filters.communities,
+          edgeTypes: filters.edgeTypes,
+          limit: filters.limit
+        };
+
+        console.log('🔧 Calling get_subgraph with filters:', serverFilters);
 
         // Call the RPC function
         const { data: result, error: rpcError } = await supabase.rpc('get_subgraph', {
-          filters: filters
+          filters: serverFilters
         });
 
         if (rpcError) {
@@ -56,7 +66,15 @@ export function useSubgraph(filters: Filters) {
     }
 
     fetchSubgraph();
-  }, [filters]);
+  }, [
+    filters.search,
+    filters.tags,
+    filters.timeStart,
+    filters.timeEnd,
+    filters.communities,
+    filters.edgeTypes,
+    filters.limit
+  ]);
 
   return { data, loading, error };
 }
