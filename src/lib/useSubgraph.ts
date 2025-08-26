@@ -24,6 +24,9 @@ export function useSubgraph(filters: Filters) {
           throw new Error('Supabase credentials not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env.local file.');
         }
 
+        console.log('🔧 Calling get_subgraph with filters:', filters);
+        console.log('🔧 Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+
         // Call the RPC function
         const { data: result, error: rpcError } = await supabase.rpc('get_subgraph', {
           filters: filters
