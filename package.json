@@ -12,7 +12,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "ts-node scripts/seed.ts",
     "version:increment": "node scripts/increment-version.js",
-    "push": "npm run version:increment && git add version.toml && git commit -m \"Auto-increment version\" && git push"
+    "push": "npm run version:increment && git add version.toml && git commit -m \"Auto-increment version [skip ci]\" && git push"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
@@ -48,6 +48,7 @@
     "react-force-graph-3d": "^1.28.0",
     "react-resizable-panels": "^3.0.5",
     "tailwind-merge": "^3.3.1",
+    "tailwindcss-animate": "^1.0.7",
     "zod": "^4.0.17"
   },
   "devDependencies": {

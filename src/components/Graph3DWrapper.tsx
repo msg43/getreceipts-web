@@ -11,8 +11,8 @@ const Graph3D = dynamic(
   { 
     ssr: false,
     loading: () => (
-      <div className="h-full w-full bg-slate-900 rounded-lg flex items-center justify-center">
-        <div className="text-slate-400">Loading 3D graph...</div>
+      <div className="h-full w-full bg-gray-900 rounded-lg flex items-center justify-center">
+        <div className="text-gray-400">Loading 3D graph...</div>
       </div>
     )
   }

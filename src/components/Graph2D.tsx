@@ -42,7 +42,7 @@ function GraphLoader({ data, selectedNodeId }: { data: GraphData; selectedNodeId
     if (selectedNodeId && sigma) {
       const nodePosition = sigma.getNodeDisplayData(selectedNodeId);
       if (nodePosition) {
-        sigma.getCamera().animate({ ...nodePosition, ratio: 0.5 }, { duration: 500 });
+        sigma.getCamera().animate(nodePosition, { duration: 500 });
       }
     }
   }, [selectedNodeId, sigma]);
@@ -82,13 +82,13 @@ function GraphLoader({ data, selectedNodeId }: { data: GraphData; selectedNodeId
     setTimeout(() => {
       if (sigma) {
         if (!selectedNodeId) {
-          // Fit the whole graph in view with some padding
-          sigma.getCamera().setState({ x: 0, y: 0, ratio: 0.9 });
+          // Fit the whole graph in view
+          sigma.getCamera().setState({ x: 0, y: 0, ratio: 0.8 });
         } else {
-          // Center on selected node with some zoom
+          // Center on selected node
           const nodePosition = sigma.getNodeDisplayData(selectedNodeId);
           if (nodePosition) {
-            sigma.getCamera().animate({ ...nodePosition, ratio: 0.5 }, { duration: 500 });
+            sigma.getCamera().animate(nodePosition, { duration: 500 });
           }
         }
       }
@@ -153,7 +153,7 @@ export function Graph2D({ data, selectedNodeId, onNodeSelect }: Graph2DProps) {
   }), []);
 
   return (
-    <div className="h-full w-full bg-slate-50 rounded-lg overflow-hidden">
+    <div className="h-full w-full bg-gray-50 rounded-lg overflow-hidden">
       <SigmaContainer style={sigmaStyle} settings={sigmaSettings}>
         <GraphLoader data={data} selectedNodeId={selectedNodeId} />
         <GraphEvents onNodeSelect={onNodeSelect} />

@@ -44,9 +44,9 @@ npm run version:increment
 # Add the updated version.toml to the commit
 git add version.toml
 
-# Commit with the provided message
+# Commit with the provided message (includes version increment and skip CI to prevent loops)
 echo -e "\n${BLUE}💾 Committing changes...${NC}"
-git commit -m "$COMMIT_MSG"
+git commit -m "$COMMIT_MSG [version bump] [skip ci]"
 
 # Get the new version for display
 NEW_VERSION=$(node -e "

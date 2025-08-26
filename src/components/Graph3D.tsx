@@ -1,6 +1,6 @@
 // Graph3D.tsx - 3D graph visualization using react-force-graph-3d
 
-import React, { useCallback, useRef, useMemo, useEffect } from 'react';
+import React, { useCallback, useRef, useMemo, useEffect, useState } from 'react';
 import ForceGraph3D from 'react-force-graph-3d';
 import type { GraphData, Node, Node3D } from '@/lib/types';
 
@@ -12,6 +12,12 @@ interface Graph3DProps {
 
 export function Graph3D({ data, selectedNodeId, onNodeSelect }: Graph3DProps) {
   const fgRef = useRef<any>();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const hasFittedRef = useRef<boolean>(false);
+  const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
+    width: 0,
+    height: 0,
+  });
 
   // Convert data to format expected by ForceGraph3D
   const graphData = useMemo(() => {
@@ -41,7 +47,7 @@ export function Graph3D({ data, selectedNodeId, onNodeSelect }: Graph3DProps) {
       onNodeSelect(node.id, node as Node);
       // Center camera on clicked node
       if (fgRef.current) {
-        const distance = 400;
+        const distance = 200;
         const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
         fgRef.current.cameraPosition(
           { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
@@ -80,98 +86,154 @@ export function Graph3D({ data, selectedNodeId, onNodeSelect }: Graph3DProps) {
     return link.source.id === selectedNodeId || link.target.id === selectedNodeId;
   }, [selectedNodeId]);
 
-  // Center camera on selected node when selection changes externally
+  // Center camera on selected node after the initial fit
   useEffect(() => {
-    if (selectedNodeId && fgRef.current) {
-      // Find the node in the graph data
-      const selectedNode = graphData.nodes.find(n => n.id === selectedNodeId);
-      if (selectedNode) {
-        // Small delay to ensure the graph is ready
-        setTimeout(() => {
-          if (fgRef.current && selectedNode) {
-            const distance = 400;
-            const distRatio = 1 + distance / Math.hypot(selectedNode.x || 0, selectedNode.y || 0, selectedNode.z || 0);
-            fgRef.current.cameraPosition(
-              { 
-                x: (selectedNode.x || 0) * distRatio, 
-                y: (selectedNode.y || 0) * distRatio, 
-                z: (selectedNode.z || 0) * distRatio 
-              },
-              selectedNode,
-              1000
-            );
-          }
-        }, 300);
-      }
-    }
+    if (!hasFittedRef.current) return; // wait until the first fit completes
+    if (!selectedNodeId || !fgRef.current) return;
+
+    const selectedNode = graphData.nodes.find(n => n.id === selectedNodeId);
+    if (!selectedNode) return;
+
+    // Small delay to ensure the engine produced stable positions
+    const timeout = setTimeout(() => {
+      const distance = 200;
+      const distRatio = 1 + distance / Math.hypot(
+        (selectedNode.x || 0),
+        (selectedNode.y || 0),
+        (selectedNode.z || 0)
+      );
+      fgRef.current.cameraPosition(
+        {
+          x: (selectedNode.x || 0) * distRatio,
+          y: (selectedNode.y || 0) * distRatio,
+          z: (selectedNode.z || 0) * distRatio,
+        },
+        selectedNode,
+        800
+      );
+    }, 200);
+
+    return () => clearTimeout(timeout);
   }, [selectedNodeId, graphData.nodes]);
 
-  // Initial camera setup when graph loads
+  // Remove previous generic initial zoom effect; handled in onEngineStop + hasFittedRef
+
+  // ResizeObserver to track container dimensions
   useEffect(() => {
-    if (fgRef.current && graphData.nodes.length > 0) {
-      // Give the graph time to initialize and position nodes
-      setTimeout(() => {
-        if (fgRef.current) {
-          // Zoom out to show the entire graph with padding
-          fgRef.current.zoomToFit(1000, 200);
-        }
-      }, 1500);
-    }
-  }, [graphData.nodes.length]);
+    if (!containerRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        setDimensions({ width, height });
+      }
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  // Only render the graph when we have valid dimensions
+  const shouldRenderGraph = dimensions.width > 0 && dimensions.height > 0;
 
   return (
-    <div className="h-full w-full bg-slate-900 rounded-lg overflow-hidden">
-      <ForceGraph3D
-        ref={fgRef}
-        graphData={graphData}
-        nodeLabel="label"
-        nodeAutoColorBy="community"
-        nodeColor={nodeColor}
-        nodeOpacity={0.9}
-        nodeResolution={16}
-        linkColor="color"
-        linkOpacity={0.4}
-        linkWidth="width"
-        linkVisibility={linkVisibility}
-        onNodeClick={handleNodeClick}
-        onBackgroundClick={handleBackgroundClick}
-        backgroundColor="#111827"
-        showNavInfo={false}
-        enableNodeDrag={true}
-        enableNavigationControls={true}
-        controlType="orbit"
-        d3AlphaDecay={0.02}
-        d3VelocityDecay={0.3}
-        warmupTicks={100}
-        cooldownTicks={0}
-        d3Force="center"
-        cameraPosition={{ x: 0, y: 0, z: 1000 }}
+    <div ref={containerRef} className="h-full w-full bg-gray-900 rounded-lg overflow-hidden">
+      {shouldRenderGraph && (
+        <ForceGraph3D
+          ref={fgRef}
+          graphData={graphData}
+          width={dimensions.width}
+          height={dimensions.height}
+          nodeLabel="label"
+          nodeAutoColorBy="community"
+          nodeColor={nodeColor}
+          nodeOpacity={0.9}
+          nodeResolution={16}
+          linkColor="color"
+          linkOpacity={0.4}
+          linkWidth="width"
+          linkVisibility={linkVisibility}
+          onNodeClick={handleNodeClick}
+          onBackgroundClick={handleBackgroundClick}
+          backgroundColor="#111827"
+          showNavInfo={false}
+          enableNodeDrag={true}
+          enableNavigationControls={true}
+          controlType="orbit"
+          d3AlphaDecay={0.02}
+          d3VelocityDecay={0.3}
+          warmupTicks={100}
+          cooldownTicks={0}
+          d3Force="center"
         onEngineStop={() => {
-          // Once the force simulation has settled, adjust camera
-          if (fgRef.current) {
-            // If no node is selected, show the full graph
-            if (!selectedNodeId) {
-              fgRef.current.zoomToFit(1000, 200);
-            } else {
-              // If a node is selected, ensure we're centered on it
+          if (!fgRef.current) return;
+
+          // First time the engine stops: fit the entire graph, once
+          if (!hasFittedRef.current) {
+            hasFittedRef.current = true;
+            fgRef.current.zoomToFit(800, 100); // longer duration + padding to guarantee visibility
+
+            // If a node is already selected (e.g., preselected), re-center after the fit
+            if (selectedNodeId) {
               const selectedNode = graphData.nodes.find(n => n.id === selectedNodeId);
-              if (selectedNode && selectedNode.x !== undefined) {
-                const distance = 400;
-                const distRatio = 1 + distance / Math.hypot(selectedNode.x || 0, selectedNode.y || 0, selectedNode.z || 0);
-                fgRef.current.cameraPosition(
-                  { 
-                    x: (selectedNode.x || 0) * distRatio, 
-                    y: (selectedNode.y || 0) * distRatio, 
-                    z: (selectedNode.z || 0) * distRatio 
-                  },
-                  selectedNode,
-                  1000
+              if (selectedNode) {
+                const distance = 200;
+                const distRatio = 1 + distance / Math.hypot(
+                  (selectedNode.x || 0),
+                  (selectedNode.y || 0),
+                  (selectedNode.z || 0)
                 );
+                setTimeout(() => {
+                  if (!fgRef.current) return;
+                  fgRef.current.cameraPosition(
+                    {
+                      x: (selectedNode.x || 0) * distRatio,
+                      y: (selectedNode.y || 0) * distRatio,
+                      z: (selectedNode.z || 0) * distRatio,
+                    },
+                    selectedNode,
+                    800
+                  );
+                }, 150);
               }
+            }
+            return;
+          }
+
+          // Subsequent engine stops: keep selected node centered, otherwise keep current framing
+          if (selectedNodeId) {
+            const selectedNode = graphData.nodes.find(n => n.id === selectedNodeId);
+            if (selectedNode) {
+              const distance = 200;
+              const distRatio = 1 + distance / Math.hypot(
+                (selectedNode.x || 0),
+                (selectedNode.y || 0),
+                (selectedNode.z || 0)
+              );
+              fgRef.current.cameraPosition(
+                {
+                  x: (selectedNode.x || 0) * distRatio,
+                  y: (selectedNode.y || 0) * distRatio,
+                  z: (selectedNode.z || 0) * distRatio,
+                },
+                selectedNode,
+                600
+              );
             }
           }
         }}
-      />
+        />
+      )}
+      
+      {/* Loading state while waiting for dimensions */}
+      {!shouldRenderGraph && (
+        <div className="h-full w-full flex items-center justify-center">
+          <div className="text-gray-400">Loading 3D graph...</div>
+        </div>
+      )}
     </div>
   );
 }
