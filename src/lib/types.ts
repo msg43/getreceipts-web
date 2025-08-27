@@ -15,6 +15,9 @@ export interface Node {
   metadata: Record<string, string | number | boolean | null>;
   createdAt: string;
   type?: 'person' | 'source' | 'claim';
+  people?: string[];
+  episode?: string;
+  episodeSlug?: string;
 }
 
 export interface Edge {

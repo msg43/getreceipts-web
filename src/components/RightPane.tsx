@@ -1,6 +1,7 @@
 // RightPane.tsx - Node details panel
 
 import React from 'react';
+import Link from 'next/link';
 import type { Node } from '@/lib/types';
 
 interface RightPaneProps {
@@ -37,13 +38,64 @@ export function RightPane({ selectedNode, onClose }: RightPaneProps) {
         </button>
       </div>
 
-      {/* Content */}
-      {selectedNode.content && (
-        <div className="mb-6">
-          <h3 className="text-sm font-medium text-slate-700 mb-2">Content</h3>
-          <p className="text-slate-600">{selectedNode.content}</p>
-        </div>
-      )}
+      {/* Claim Detail Box - Highlighted */}
+      <div className="mb-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+        <h3 className="text-lg font-semibold text-blue-900 mb-3">Claim Details</h3>
+        
+        {/* Content */}
+        {selectedNode.content && (
+          <div className="mb-4">
+            <p className="text-slate-700 leading-relaxed">{selectedNode.content}</p>
+          </div>
+        )}
+
+        {/* People */}
+        {selectedNode.people && selectedNode.people.length > 0 && (
+          <div className="mb-4">
+            <h4 className="text-sm font-medium text-slate-700 mb-2 flex items-center">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              People
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {selectedNode.people.map((person, index) => (
+                <Link
+                  key={index}
+                  href={`/people/${encodeURIComponent(person.toLowerCase().replace(/\s+/g, '-').replace(/\./g, ''))}`}
+                  className="inline-flex items-center px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-full text-sm transition-colors"
+                >
+                  {person}
+                  <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Episode */}
+        {selectedNode.episode && selectedNode.episodeSlug && (
+          <div className="mb-4">
+            <h4 className="text-sm font-medium text-slate-700 mb-2 flex items-center">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 12.464l-9.192 9.192M12 2.25L2.464 11.786M21.75 12L12.214 21.536" />
+              </svg>
+              Episode
+            </h4>
+            <Link
+              href={`/episode/${selectedNode.episodeSlug}`}
+              className="inline-flex items-center px-3 py-2 bg-green-100 hover:bg-green-200 text-green-800 rounded-md text-sm transition-colors"
+            >
+              {selectedNode.episode}
+              <svg className="w-3 h-3 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </Link>
+          </div>
+        )}
+      </div>
 
       {/* Metadata */}
       <div className="space-y-4">

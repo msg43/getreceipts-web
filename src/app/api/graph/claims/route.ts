@@ -9,8 +9,10 @@ export async function GET() {
       .select(`
         id,
         slug,
-        text_short,
+        title,
+        content,
         topics,
+        metadata,
         aggregates(consensus_score)
       `)
       .limit(100);
@@ -37,14 +39,29 @@ export async function GET() {
     }
     
     // Format for D3.js visualization
-    const nodes = (claimsData || []).map(claim => ({
-      id: claim.id,
-      slug: claim.slug,
-      text: claim.text_short || "",
-      topics: claim.topics || [],
-      consensus: Number(claim.aggregates?.[0]?.consensus_score || 0.5),
-      size: 20 + (Number(claim.aggregates?.[0]?.consensus_score || 0.5) * 20) // Size based on consensus
-    }));
+    const nodes = (claimsData || []).map(claim => {
+      const metadata = claim.metadata || {};
+      return {
+        id: claim.id,
+        slug: claim.slug,
+        label: claim.title || claim.text_short || "",
+        title: claim.title || claim.text_short || "",
+        content: claim.content || "",
+        text: claim.text_short || "",
+        topics: claim.topics || [],
+        consensus: Number(claim.aggregates?.[0]?.consensus_score || 0.5),
+        size: 20 + (Number(claim.aggregates?.[0]?.consensus_score || 0.5) * 20), // Size based on consensus
+        people: metadata.people || [],
+        episode: metadata.episode || null,
+        episodeSlug: metadata.episodeSlug || null,
+        type: 'claim',
+        color: '#3B82F6', // Default color
+        community: 1, // Default community
+        tags: claim.topics || [],
+        metadata: metadata,
+        createdAt: new Date().toISOString()
+      };
+    });
     
     const links = (relationshipsData || []).map(rel => ({
       source: rel.from_claim_id,
@@ -56,7 +73,8 @@ export async function GET() {
     
     return NextResponse.json({
       nodes,
-      links,
+      edges: links,
+      clusters: [], // TODO: Implement clusters from claim_clusters table
       metadata: {
         total_claims: nodes.length,
         total_relationships: links.length,
