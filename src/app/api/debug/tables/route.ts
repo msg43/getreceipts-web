@@ -3,48 +3,41 @@ import { supabase } from "@/lib/db";
 
 export async function GET() {
   try {
-    console.log("🔍 Testing Supabase client connection...");
+    console.log('🔧 Trying Supabase connection...');
     
-    // Test 1: Check if we can connect to Supabase
-    const { error: authError } = await supabase.auth.getUser();
+    // First, try to list tables
+    const { data: tables, error: tablesError } = await supabase
+      .from('information_schema.tables')
+      .select('table_name')
+      .eq('table_schema', 'public');
     
-    // Test 2: Try to query api_keys table directly with Supabase client
-    const { data: apiKeys, error: apiKeysError } = await supabase
-      .from('api_keys')
-      .select('name, is_active')
+    if (tablesError) {
+      console.log('Tables query failed, trying claims directly...');
+    }
+    
+    // Try to get claims data directly
+    const { data: claimsData, error: claimsError } = await supabase
+      .from('claims')
+      .select('*')
       .limit(5);
     
-    // Test 3: Try to query users table
-    const { data: users, error: usersError } = await supabase
-      .from('users')
-      .select('email')
-      .limit(5);
+    // Try to get a simple count
+    const { count, error: countError } = await supabase
+      .from('claims')
+      .select('*', { count: 'exact', head: true });
     
     return NextResponse.json({
-      success: true,
-      supabaseConnection: {
-        authError: authError?.message || "No auth error",
-        apiKeysQuery: {
-          success: !apiKeysError,
-          error: apiKeysError?.message,
-          count: apiKeys?.length || 0,
-          data: apiKeys
-        },
-        usersQuery: {
-          success: !usersError,
-          error: usersError?.message,
-          count: users?.length || 0,
-          data: users
-        }
-      }
+      tables: tables || null,
+      tablesError: tablesError?.message || null,
+      claimsData: claimsData || null,
+      claimsError: claimsError?.message || null,
+      claimsCount: count,
+      countError: countError?.message || null,
+      timestamp: new Date().toISOString()
     });
-    
-  } catch (error) {
-    console.error("Debug endpoint error:", error);
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      connectionInfo: "Connection failed"
-    }, { status: 500 });
+  } catch (e: unknown) {
+    const errorMessage = e instanceof Error ? e.message : "Server error";
+    console.error('Debug API error:', errorMessage);
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
