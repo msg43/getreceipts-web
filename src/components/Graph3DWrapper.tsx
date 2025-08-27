@@ -5,6 +5,7 @@
 import dynamic from 'next/dynamic';
 import { useState, useEffect } from 'react';
 import type { GraphData, Node } from '@/lib/types';
+import { isMobileDevice, isLowPowerDevice } from '@/lib/mobile-utils';
 
 // Dynamically import Graph3D with SSR disabled
 const Graph3D = dynamic(
@@ -36,6 +37,18 @@ export function Graph3DWrapper(props: Graph3DWrapperProps) {
   useEffect(() => {
     setIsClient(true);
     
+    // Check device capabilities
+    const isMobile = isMobileDevice();
+    const isLowPower = isLowPowerDevice();
+    
+    // Skip 3D on low power devices
+    if (isLowPower) {
+      console.warn('Low power device detected, recommending 2D mode');
+      setHasError(true);
+      setErrorMessage('For better performance on this device, please use 2D mode');
+      return;
+    }
+    
     // Check WebGL support
     try {
       const canvas = document.createElement('canvas');
@@ -43,7 +56,13 @@ export function Graph3DWrapper(props: Graph3DWrapperProps) {
       if (!gl) {
         console.error('WebGL not supported');
         setHasError(true);
-        setErrorMessage('WebGL not supported by your browser');
+        setErrorMessage(isMobile ? 
+          '3D graphics not supported on this mobile device. Try switching to 2D mode.' : 
+          'WebGL not supported by your browser'
+        );
+      } else if (isMobile) {
+        // On mobile, warn about potential performance issues
+        console.warn('3D mode on mobile may have performance issues');
       }
     } catch (error) {
       console.error('Error checking WebGL support:', error);

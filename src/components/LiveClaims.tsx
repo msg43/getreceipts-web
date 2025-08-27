@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { getOptimalTimeout } from '@/lib/mobile-utils';
 
 interface Claim {
   id: string;
@@ -68,7 +69,7 @@ export default function LiveClaims() {
       controller.abort();
       setError('Request timed out. Please check your connection.');
       setLoading(false);
-    }, 10000); // 10 second timeout
+    }, getOptimalTimeout()); // Mobile-optimized timeout
 
     fetchClaims();
 
