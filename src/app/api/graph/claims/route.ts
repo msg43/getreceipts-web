@@ -44,10 +44,10 @@ export async function GET() {
       return {
         id: claim.id,
         slug: claim.slug,
-        label: claim.title || claim.text_short || "",
-        title: claim.title || claim.text_short || "",
+        label: claim.title || "",
+        title: claim.title || "",
         content: claim.content || "",
-        text: claim.text_short || "",
+        text: claim.title || "",
         topics: claim.topics || [],
         consensus: Number(claim.aggregates?.[0]?.consensus_score || 0.5),
         size: 20 + (Number(claim.aggregates?.[0]?.consensus_score || 0.5) * 20), // Size based on consensus
