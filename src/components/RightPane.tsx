@@ -163,9 +163,12 @@ export function RightPane({ selectedNode, onClose }: RightPaneProps) {
 
       {/* Actions */}
       <div className="mt-6 pt-6 border-t">
-        <button className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+        <Link 
+          href={`/claim/${selectedNode.slug}`}
+          className="block w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-center"
+        >
           View Full Claim
-        </button>
+        </Link>
       </div>
     </div>
   );
