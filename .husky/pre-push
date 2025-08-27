@@ -16,13 +16,12 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# For now, skip build check to speed up push (build will be checked in CI)
-# Uncomment the lines below if you want to include build check:
-# echo "🏗️  Testing build..."
-# npm run build
-# if [ $? -ne 0 ]; then
-#   echo "❌ Build failed. Please fix the build errors before pushing."
-#   exit 1
-# fi
+# Test build to catch compilation and build errors
+echo "🏗️  Testing build..."
+npm run build
+if [ $? -ne 0 ]; then
+  echo "❌ Build failed. Please fix the build errors before pushing."
+  exit 1
+fi
 
 echo "✅ Pre-push checks passed! Build will be validated in CI."
