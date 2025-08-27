@@ -3,7 +3,7 @@ import { supabase } from "@/lib/db";
 
 export async function GET() {
   try {
-    // Get all claims with their consensus scores using Supabase
+    // Get all claims using Supabase
     const { data: claimsData, error: claimsError } = await supabase
       .from('claims')
       .select(`
@@ -11,9 +11,8 @@ export async function GET() {
         slug,
         title,
         content,
-        topics,
-        metadata,
-        aggregates(consensus_score)
+        tags,
+        metadata
       `)
       .limit(100);
     
@@ -24,13 +23,12 @@ export async function GET() {
     
     // Get all relationships using Supabase
     const { data: relationshipsData, error: relationshipsError } = await supabase
-      .from('claim_relationships')
+      .from('claim_edges')
       .select(`
-        from_claim_id,
-        to_claim_id,
-        relationship_type,
-        strength,
-        evidence
+        source_id,
+        target_id,
+        edge_type,
+        weight
       `);
     
     if (relationshipsError) {
@@ -48,27 +46,26 @@ export async function GET() {
         title: claim.title || "",
         content: claim.content || "",
         text: claim.title || "",
-        topics: claim.topics || [],
-        consensus: Number(claim.aggregates?.[0]?.consensus_score || 0.5),
-        size: 20 + (Number(claim.aggregates?.[0]?.consensus_score || 0.5) * 20), // Size based on consensus
+        topics: claim.tags || [],
+        consensus: 0.5, // Default consensus score
+        size: 30, // Default size
         people: metadata.people || [],
         episode: metadata.episode || null,
         episodeSlug: metadata.episodeSlug || null,
         type: 'claim',
         color: '#3B82F6', // Default color
         community: 1, // Default community
-        tags: claim.topics || [],
+        tags: claim.tags || [],
         metadata: metadata,
         createdAt: new Date().toISOString()
       };
     });
     
     const links = (relationshipsData || []).map(rel => ({
-      source: rel.from_claim_id,
-      target: rel.to_claim_id,
-      type: rel.relationship_type,
-      strength: Number(rel.strength || 0.5),
-      evidence: rel.evidence
+      source: rel.source_id,
+      target: rel.target_id,
+      type: rel.edge_type,
+      strength: Number(rel.weight || 0.5)
     }));
     
     return NextResponse.json({
