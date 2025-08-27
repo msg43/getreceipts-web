@@ -7,12 +7,16 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest",
+    "lint:fix": "eslint --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "pre-push": "npm run lint && npm run test && npm run build",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "ts-node scripts/seed.ts",
     "version:increment": "node scripts/increment-version.mjs",
-    "push": "npm run version:increment && git add version.toml && git commit -m \"Auto-increment version [skip ci]\" && git push"
+    "push": "npm run version:increment && git add version.toml && git commit -m \"Auto-increment version [skip ci]\" && git push",
+    "prepare": "husky"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
@@ -63,6 +67,7 @@
     "drizzle-kit": "^0.31.4",
     "eslint": "^9",
     "eslint-config-next": "15.5.0",
+    "husky": "^9.1.7",
     "prettier": "^3.6.2",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",

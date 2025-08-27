@@ -20,6 +20,7 @@ const eslintConfig = [
       "next-env.d.ts",
       "Docs/Private/**/*",
       "graph-proto-v5/**/*",
+      "scripts/**/*",
     ],
   },
 ];
