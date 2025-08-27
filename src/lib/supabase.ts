@@ -8,4 +8,20 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase client configuration. Please check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+  },
+  global: {
+    headers: {
+      'x-client-info': 'getreceipts-web'
+    },
+  },
+  db: {
+    schema: 'public',
+  },
+  realtime: {
+    timeout: 30000, // Longer timeout for mobile connections
+  },
+});

@@ -3,10 +3,13 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { MobileErrorFallback } from './MobileErrorFallback';
+import { isMobileDevice } from '@/lib/mobile-utils';
 
 interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
+  isMobile: boolean;
 }
 
 export default class GlobalErrorBoundary extends React.Component<
@@ -15,10 +18,14 @@ export default class GlobalErrorBoundary extends React.Component<
 > {
   constructor(props: { children: React.ReactNode }) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, isMobile: false };
   }
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+  componentDidMount() {
+    this.setState({ isMobile: isMobileDevice() });
+  }
+
+  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
     return { hasError: true, error };
   }
 
@@ -27,7 +34,18 @@ export default class GlobalErrorBoundary extends React.Component<
   }
 
   render() {
-    if (this.state.hasError) {
+    if (this.state.hasError && this.state.error) {
+      // Use mobile-specific error fallback for mobile devices
+      if (this.state.isMobile) {
+        return (
+          <MobileErrorFallback 
+            error={this.state.error} 
+            resetErrorBoundary={() => this.setState({ hasError: false, error: null })}
+          />
+        );
+      }
+
+      // Desktop error fallback
       return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
           <Card className="max-w-md w-full">

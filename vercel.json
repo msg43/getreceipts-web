@@ -47,6 +47,14 @@
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-UA-Compatible",
+          "value": "IE=edge"
+        },
+        {
+          "key": "Vary",
+          "value": "User-Agent"
         }
       ]
     }

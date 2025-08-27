@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || '';
+  const userAgent = request.headers.get('user-agent') || '';
+  
+  // Detect mobile devices
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
   
   // Define your domain configurations
   const domainConfigs = {
@@ -21,6 +25,8 @@ export function middleware(request: NextRequest) {
   requestHeaders.set('x-domain-theme', domainConfig.theme);
   requestHeaders.set('x-domain-brand', domainConfig.brand);
   requestHeaders.set('x-hostname', hostname);
+  requestHeaders.set('x-is-mobile', isMobile.toString());
+  requestHeaders.set('x-user-agent', userAgent);
   
   // Handle root path routing based on domain
   if (request.nextUrl.pathname === '/') {
