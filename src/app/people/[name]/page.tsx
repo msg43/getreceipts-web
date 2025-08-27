@@ -49,7 +49,7 @@ export default function PeoplePage({ params }: PeoplePageProps) {
         const data = await response.json();
         
         // Filter claims that include this person
-        const personClaims = data.nodes.filter((claim: any) => 
+        const personClaims = data.nodes.filter((claim: Claim) => 
           claim.people && claim.people.some((person: string) => 
             person.toLowerCase().replace(/\s+/g, '-').replace(/\./g, '') === name
           )
@@ -153,7 +153,7 @@ export default function PeoplePage({ params }: PeoplePageProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               <h3 className="text-lg font-medium text-slate-900 mb-2">No claims found</h3>
-              <p className="text-slate-600">This person hasn't made any claims yet.</p>
+              <p className="text-slate-600">This person hasn&apos;t made any claims yet.</p>
             </div>
           ) : (
             claims.map((claim) => (
