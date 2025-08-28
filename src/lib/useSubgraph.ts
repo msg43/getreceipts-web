@@ -37,25 +37,12 @@ export function useSubgraph(filters: Filters) {
 
         console.log('🔧 Calling get_subgraph with filters:', serverFilters);
 
-        // TEMPORARY: Use mock endpoint for testing
-        const response = await fetch('/api/graph/mock');
+        // Call the REST API instead of RPC function since RPC doesn't exist
+        const response = await fetch('/api/graph/claims');
         if (!response.ok) {
-          throw new Error('Failed to fetch mock data');
+          throw new Error('Failed to fetch claims from API');
         }
         const result = await response.json();
-
-        // OLD CODE: Call the RPC function
-        // const { data: result, error: rpcError } = await supabase.rpc('get_subgraph', {
-        //   filters: serverFilters
-        // });
-
-        // if (rpcError) {
-        //   console.error('RPC Error:', rpcError);
-        //   if (rpcError.code === '42883') {
-        //     throw new Error('The get_subgraph function does not exist in your database. Please run the SQL setup scripts.');
-        //   }
-        //   throw new Error(`Database error: ${rpcError.message}`);
-        // }
 
         if (result) {
           setData({

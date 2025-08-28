@@ -36,7 +36,7 @@ export default function EpisodePage({ params }: EpisodePageProps) {
         
         // Fetch all claims and filter by episode on the client side
         // In a real app, you'd want to do this filtering on the server
-        const response = await fetch('/api/graph/mock');
+        const response = await fetch('/api/graph/claims');
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
