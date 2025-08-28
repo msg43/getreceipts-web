@@ -9,10 +9,10 @@ export async function GET() {
       .select(`
         id,
         slug,
-        title,
-        content,
-        tags,
-        metadata
+        text_short,
+        text_long,
+        topics,
+        created_at
       `)
       .limit(100);
     
@@ -38,26 +38,25 @@ export async function GET() {
     
     // Format for D3.js visualization
     const nodes = (claimsData || []).map(claim => {
-      const metadata = claim.metadata || {};
       return {
         id: claim.id,
         slug: claim.slug,
-        label: claim.title || "",
-        title: claim.title || "",
-        content: claim.content || "",
-        text: claim.title || "",
-        topics: claim.tags || [],
+        label: claim.text_short || "",
+        title: claim.text_short || "",
+        content: claim.text_long || "",
+        text: claim.text_short || "",
+        topics: claim.topics || [],
         consensus: 0.5, // Default consensus score
         size: 30, // Default size
-        people: metadata.people || [],
-        episode: metadata.episode || null,
-        episodeSlug: metadata.episodeSlug || null,
+        people: [], // Will be populated from metadata if available
+        episode: null,
+        episodeSlug: null,
         type: 'claim',
         color: '#3B82F6', // Default color
         community: 1, // Default community
-        tags: claim.tags || [],
-        metadata: metadata,
-        createdAt: new Date().toISOString()
+        tags: claim.topics || [],
+        metadata: {},
+        createdAt: claim.created_at || new Date().toISOString()
       };
     });
     

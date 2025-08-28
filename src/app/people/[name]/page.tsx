@@ -41,7 +41,7 @@ export default function PeoplePage({ params }: PeoplePageProps) {
         
         // Fetch all claims and filter by person on the client side
         // In a real app, you'd want to do this filtering on the server
-        const response = await fetch('/api/graph/claims');
+        const response = await fetch('/api/graph/mock');
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
