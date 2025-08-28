@@ -8,23 +8,18 @@ export async function GET(_: Request, { params }: { params: Promise<{ tag: strin
     // Decode the tag parameter
     const decodedTag = decodeURIComponent(tag);
     
-    // Fetch claims that have this tag in their topics array
+    // Fetch claims that have this tag in their tags array
     const { data: claims, error: claimsError } = await supabase
       .from('claims')
       .select(`
         id,
         slug,
-        text_short,
-        text_long,
-        topics,
-        created_at,
-        aggregates (
-          consensus_score,
-          support_count,
-          dispute_count
-        )
+        title,
+        content,
+        tags,
+        created_at
       `)
-      .contains('topics', [decodedTag])
+      .contains('tags', [decodedTag])
       .order('created_at', { ascending: false });
 
     if (claimsError) {
@@ -42,10 +37,12 @@ export async function GET(_: Request, { params }: { params: Promise<{ tag: strin
       });
     }
 
-    // Transform the data to flatten aggregates
+    // Transform the data to match expected format
     const transformedClaims = claims.map(claim => ({
       ...claim,
-      aggregates: claim.aggregates?.[0] || null
+      text_short: claim.title, // Map title to text_short for compatibility
+      topics: claim.tags,      // Map tags to topics for compatibility
+      aggregates: null         // No aggregates table in graph prototype
     }));
 
     return NextResponse.json({
@@ -72,7 +69,7 @@ export async function HEAD(_: Request, { params }: { params: Promise<{ tag: stri
     const { count, error } = await supabase
       .from('claims')
       .select('id', { count: 'exact', head: true })
-      .contains('topics', [decodedTag]);
+      .contains('tags', [decodedTag]);
 
     if (error) {
       return new NextResponse(null, { status: 500 });
