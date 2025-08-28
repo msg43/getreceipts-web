@@ -62,8 +62,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     };
   }
 
-  const agg = await getAggregateByClaimId(c.id).catch(() => null);
-  const consensusPercentage = Math.round(Number(agg?.consensus_score ?? 0.5) * 100);
+  // Skip aggregates since table doesn't exist yet
+  // const agg = await getAggregateByClaimId(c.id).catch(() => null);
+  const consensusPercentage = Math.round(Number(0.5) * 100); // Default to 50% since no aggregates table
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://getreceipts-web.vercel.app';
   const badgeUrl = `${baseUrl}/api/badge/${slug}`;
   const claimUrl = `${baseUrl}/claim/${slug}`;
@@ -107,9 +108,8 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
     const c = await getClaimBySlug(slug).catch(() => null);
     if (!c) return <div className="p-8">Not found</div>;
     
-    // Fetch all data in parallel for better performance with error handling
-    const [agg, reviews, srcs, pos, people, jargon, models, relationships, votes, comments] = await Promise.all([
-      getAggregateByClaimId(c.id).catch(() => null),
+    // Fetch all data in parallel for better performance with error handling  
+    const [reviews, srcs, pos, people, jargon, models, relationships, votes, comments] = await Promise.all([
       getModelReviewsByClaimId(c.id).catch(() => []),
       getSourcesByClaimId(c.id).catch(() => []),
       getPositionsByClaimId(c.id).catch(() => []),
@@ -135,7 +135,7 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
     "datePublished": c.created_at ? new Date(c.created_at).toISOString() : new Date().toISOString(),
     "reviewRating": {
       "@type": "Rating",
-      "ratingValue": Number(agg?.consensus_score ?? 0.5),
+      "ratingValue": 0.5, // Default rating since no aggregates table
       "bestRating": 1,
       "worstRating": 0,
       "ratingExplanation": `Consensus score based on ${srcs.length} sources and ${pos.length} positions`
@@ -169,7 +169,7 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
                     <option key={r.id}>{r.model} • {Math.round(Number(r.score)*100)}%</option>
                   )) : <option>Waiting for reviews…</option>}
                 </select>
-                <ClaimActions claim={c} aggregate={agg} slug={slug} />
+                <ClaimActions claim={c} aggregate={undefined} slug={slug} />
               </div>
               {c.text_long && (
                 <div className="mt-4 pt-4 border-t">

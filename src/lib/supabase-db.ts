@@ -24,15 +24,9 @@ export async function getClaimBySlug(slug: string) {
   return data
 }
 
-export async function getAggregateByClaimId(claimId: string) {
-  const { data, error } = await supabase
-    .from('aggregates')
-    .select('*')
-    .eq('claim_id', claimId)
-    .single()
-  
-  if (error) throw error
-  return data
+export async function getAggregateByClaimId(_claimId: string) {
+  // Return null since aggregates table doesn't exist yet
+  return null
 }
 
 export async function getModelReviewsByClaimId(claimId: string) {

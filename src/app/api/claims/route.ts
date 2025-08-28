@@ -3,17 +3,10 @@ import { supabase } from "@/lib/db";
 
 export async function GET() {
   try {
-    // Fetch claims with their aggregates
+    // Fetch claims without aggregates (table doesn't exist yet)
     const { data: claims, error: claimsError } = await supabase
       .from('claims')
-      .select(`
-        *,
-        aggregates (
-          consensus_score,
-          support_count,
-          dispute_count
-        )
-      `)
+      .select('*')
       .order('created_at', { ascending: false })
       .limit(10);
 
@@ -25,7 +18,7 @@ export async function GET() {
     // Transform the data to match our expected format
     const transformedClaims = claims?.map(claim => ({
       ...claim,
-      consensus: claim.aggregates?.[0] || null
+      consensus: null // No aggregates table yet
     })) || [];
 
     return NextResponse.json({

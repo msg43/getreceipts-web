@@ -101,14 +101,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Insert aggregates
-    const { error: aggregatesError } = await supabase
-      .from('aggregates')
-      .insert({ claim_id: claim.id, consensus_score: "0.5" });
-      
-    if (aggregatesError) {
-      console.error("⚠️ Aggregates insert error:", aggregatesError);
-    }
+    // Skip aggregates insertion since table doesn't exist yet
+    // TODO: Create aggregates table and re-enable this
 
     // Handle knowledge artifacts from Knowledge_Chipper
     if (data.knowledge_artifacts) {

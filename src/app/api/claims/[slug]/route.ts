@@ -21,14 +21,12 @@ export async function GET(_: Request, { params }: { params: Promise<{ slug: stri
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    // Fetch related data in parallel
+    // Fetch related data in parallel (skip aggregates table that doesn't exist)
     const [
-      { data: aggregates },
       { data: modelReviews },
       { data: sources },
       { data: positions }
     ] = await Promise.all([
-      supabase.from('aggregates').select('*').eq('claim_id', claim.id),
       supabase.from('model_reviews').select('*').eq('claim_id', claim.id),
       supabase.from('sources').select('*').eq('claim_id', claim.id),
       supabase.from('positions').select('*').eq('claim_id', claim.id)
@@ -36,7 +34,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ slug: stri
 
     return NextResponse.json({
       claim,
-      aggregates: aggregates?.[0] || null,
+      aggregates: null, // No aggregates table yet
       model_reviews: modelReviews || [],
       sources: sources || [],
       positions: positions || []

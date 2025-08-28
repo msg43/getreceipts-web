@@ -21,13 +21,8 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ slug: 
       return new NextResponse("Not found", { status: 404 });
     }
 
-    const { data: aggregates } = await supabase
-      .from('aggregates')
-      .select('*')
-      .eq('claim_id', claim.id)
-      .single();
-
-    const scoreNum = Number(aggregates?.consensus_score ?? 0.5);
+    // Skip aggregates since table doesn't exist yet - use default score
+    const scoreNum = 0.5;
     const pct = Math.max(0, Math.min(1, Number.isFinite(scoreNum) ? scoreNum : 0.5));
 
     // DRIZZLE VERSION (preserved for future fix)

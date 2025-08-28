@@ -1,7 +1,6 @@
 // useSubgraph.ts - Hook for fetching graph data
 
 import { useEffect, useState } from 'react';
-import { supabase } from './supabaseClient';
 import type { GraphData, Filters } from './types';
 
 export function useSubgraph(filters: Filters) {
