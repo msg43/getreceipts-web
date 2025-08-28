@@ -140,7 +140,7 @@ export default function GraphPage() {
   }, [navigateNodes, clearSelection, toggleMode]);
 
   return (
-    <div className="h-screen bg-slate-100 p-4">
+    <div className="h-screen bg-gray-100 p-4">
       <div className="h-full">
         {/* Header */}
         <div className="mb-4">

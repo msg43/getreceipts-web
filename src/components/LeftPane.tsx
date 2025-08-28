@@ -1,7 +1,9 @@
 // LeftPane.tsx - Filters, show/hide toggles, and bookmarks panel
 
 import React, { useState, useEffect } from 'react';
-import type { Filters, Bookmark, Node } from '@/lib/types';
+import Link from 'next/link';
+import type { Filters, Node } from '@/lib/types';
+import { useBookmarks } from '@/lib/useBookmarks';
 
 interface LeftPaneProps {
   filters: Filters;
@@ -12,7 +14,7 @@ interface LeftPaneProps {
 }
 
 export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNodeSelect }: LeftPaneProps) {
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
+  const { bookmarks: allBookmarks, addBookmark: addNewBookmark, removeBookmark, getBookmarksByType } = useBookmarks();
   const [localSearch, setLocalSearch] = useState(filters.search || '');
   const [selectedTags, setSelectedTags] = useState<string[]>(filters.tags || []);
   const [selectedCommunities, setSelectedCommunities] = useState<number[]>(filters.communities || []);
@@ -37,39 +39,26 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
     { id: 5, name: 'Economics', color: '#F59E0B' },
   ];
 
-  // Load bookmarks from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('graph-bookmarks');
-    if (saved) {
-      setBookmarks(JSON.parse(saved));
-    }
-  }, []);
-
-  // Save bookmarks to localStorage
-  const saveBookmarks = (newBookmarks: Bookmark[]) => {
-    setBookmarks(newBookmarks);
-    localStorage.setItem('graph-bookmarks', JSON.stringify(newBookmarks));
-  };
+  // Get only claim bookmarks for the graph interface
+  const claimBookmarks = getBookmarksByType('claim');
 
   // Add current selection as bookmark
   const addBookmark = () => {
     if (selectedNodeId && data) {
       const selectedNode = data.nodes.find(n => n.id === selectedNodeId);
       if (selectedNode) {
-        const newBookmark: Bookmark = {
-          id: selectedNodeId,
+        addNewBookmark({
+          type: 'claim',
           slug: selectedNode.slug || `node-${selectedNodeId}`,
           title: selectedNode.title || selectedNode.label || `Node ${selectedNodeId}`,
-          timestamp: Date.now(),
-        };
-        saveBookmarks([...bookmarks, newBookmark]);
+          url: `/claim/${selectedNode.slug || selectedNodeId}`,
+          description: selectedNode.content || undefined,
+          metadata: { 
+            claimShort: selectedNode.title || selectedNode.label 
+          },
+        });
       }
     }
-  };
-
-  // Remove bookmark
-  const removeBookmark = (id: string) => {
-    saveBookmarks(bookmarks.filter(b => b.id !== id));
   };
 
   // Apply filters including show/hide states
@@ -144,33 +133,39 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
           )}
         </div>
         <div className="space-y-2">
-          {bookmarks.length === 0 ? (
-            <p className="text-sm text-slate-500">No bookmarks yet</p>
+          {claimBookmarks.length === 0 ? (
+            <p className="text-sm text-slate-500">No claim bookmarks yet</p>
           ) : (
-            bookmarks.map(bookmark => (
+            claimBookmarks.map(bookmark => (
               <div
                 key={bookmark.id}
-                className="flex justify-between items-center p-2 bg-slate-50 rounded hover:bg-slate-100 group"
+                className="flex justify-between items-center p-2 bg-slate-50 rounded hover:bg-gray-100 group"
               >
-                <span 
-                  className="text-sm truncate cursor-pointer flex-1"
-                  onClick={() => {
-                    const node = data?.nodes.find(n => n.id === bookmark.id);
-                    if (node) {
-                      onNodeSelect?.(node.id, node);
-                    }
-                  }}
+                <Link
+                  href={bookmark.url}
+                  className="text-sm truncate hover:text-blue-600 transition-colors flex-1"
+                  title={bookmark.title}
                 >
                   {bookmark.title}
-                </span>
+                </Link>
                 <button
                   onClick={() => removeBookmark(bookmark.id)}
                   className="text-red-500 hover:text-red-600 text-sm ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  title="Remove bookmark"
                 >
                   ×
                 </button>
               </div>
             ))
+          )}
+          
+          {allBookmarks.length > claimBookmarks.length && (
+            <Link
+              href="/bookmarks"
+              className="block text-xs text-blue-600 hover:text-blue-800 transition-colors mt-2 text-center"
+            >
+              View all bookmarks ({allBookmarks.length}) →
+            </Link>
           )}
         </div>
       </div>
@@ -340,7 +335,7 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
               className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                 selectedTags.includes(tag)
                   ? 'bg-blue-500 text-white'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  : 'bg-gray-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
               {tag}

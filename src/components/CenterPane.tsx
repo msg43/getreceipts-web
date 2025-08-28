@@ -32,7 +32,7 @@ export function CenterPane({
 
       {/* Loading State */}
       {loading && (
-        <div className="absolute inset-0 bg-slate-100 rounded-lg flex items-center justify-center">
+        <div className="absolute inset-0 bg-gray-100 rounded-lg flex items-center justify-center">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-4"></div>
             <p className="text-slate-600">Loading graph data...</p>
@@ -42,7 +42,7 @@ export function CenterPane({
 
       {/* Error State */}
       {error && !loading && (
-        <div className="absolute inset-0 bg-slate-100 rounded-lg flex items-center justify-center">
+        <div className="absolute inset-0 bg-gray-100 rounded-lg flex items-center justify-center">
           <div className="text-center text-red-600">
             <svg className="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -78,7 +78,7 @@ export function CenterPane({
           )}
         </>
       ) : !loading && !error ? (
-        <div className="absolute inset-0 bg-slate-100 rounded-lg flex items-center justify-center">
+        <div className="absolute inset-0 bg-gray-100 rounded-lg flex items-center justify-center">
           <div className="text-center text-slate-600">
             <svg className="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />

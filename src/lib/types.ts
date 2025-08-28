@@ -61,6 +61,15 @@ export interface Bookmark {
   slug: string;
   title: string;
   timestamp: number;
+  type: 'claim' | 'tag' | 'person' | 'episode';
+  url: string;
+  description?: string;
+  metadata?: {
+    tagName?: string;
+    personName?: string;
+    episodeTitle?: string;
+    claimShort?: string;
+  };
 }
 
 // For 3D graph positioning

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { use } from 'react';
+import { BookmarkButton } from '@/components/BookmarkButton';
 
 interface Claim {
   id: string;
@@ -69,7 +70,7 @@ export default function PeoplePage({ params }: PeoplePageProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-100 p-4">
+      <div className="min-h-screen bg-gray-100 p-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-center h-64">
             <div className="text-lg text-slate-600">Loading claims...</div>
@@ -81,7 +82,7 @@ export default function PeoplePage({ params }: PeoplePageProps) {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-100 p-4">
+      <div className="min-h-screen bg-gray-100 p-4">
         <div className="max-w-4xl mx-auto">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <h2 className="text-lg font-semibold text-red-800 mb-2">Error</h2>
@@ -96,7 +97,7 @@ export default function PeoplePage({ params }: PeoplePageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 p-4">
+    <div className="min-h-screen bg-gray-100 p-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -107,16 +108,29 @@ export default function PeoplePage({ params }: PeoplePageProps) {
             Back to Graph
           </Link>
           
-          <div className="flex items-center mb-4">
-            <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mr-4">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mr-4">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-slate-900">{personName}</h1>
+                <p className="text-slate-600">Claims made by this person</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900">{personName}</h1>
-              <p className="text-slate-600">Claims made by this person</p>
-            </div>
+            
+            <BookmarkButton
+              type="person"
+              slug={name}
+              title={personName}
+              url={`/people/${encodeURIComponent(name)}`}
+              description={`Claims and positions by ${personName}`}
+              metadata={{ personName }}
+              variant="full"
+              size="md"
+            />
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border p-4">
@@ -211,12 +225,16 @@ export default function PeoplePage({ params }: PeoplePageProps) {
                   {claim.tags && claim.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {claim.tags.slice(0, 3).map((tag, index) => (
-                        <span key={index} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">
+                        <Link
+                          key={index}
+                          href={`/tags/${encodeURIComponent(tag)}`}
+                          className="px-2 py-1 bg-gray-100 hover:bg-slate-200 text-slate-600 hover:text-slate-800 rounded text-xs transition-colors"
+                        >
                           {tag}
-                        </span>
+                        </Link>
                       ))}
                       {claim.tags.length > 3 && (
-                        <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">
+                        <span className="px-2 py-1 bg-gray-100 text-slate-600 rounded text-xs">
                           +{claim.tags.length - 3} more
                         </span>
                       )}

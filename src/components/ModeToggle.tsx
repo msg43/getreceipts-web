@@ -16,7 +16,7 @@ export function ModeToggle({ mode, onModeChange }: ModeToggleProps) {
         className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
           mode === '2D'
             ? 'bg-blue-500 text-white'
-            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+            : 'bg-gray-100 text-slate-700 hover:bg-slate-200'
         }`}
         aria-label="Switch to 2D view"
       >
@@ -27,7 +27,7 @@ export function ModeToggle({ mode, onModeChange }: ModeToggleProps) {
         className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
           mode === '3D'
             ? 'bg-blue-500 text-white'
-            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+            : 'bg-gray-100 text-slate-700 hover:bg-slate-200'
         }`}
         aria-label="Switch to 3D view"
       >

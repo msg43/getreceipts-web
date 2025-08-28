@@ -22,6 +22,15 @@ export default function Home() {
               </div>
             </div>
             <nav className="hidden md:flex items-center space-x-6">
+              <Link href="/graph" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+                Graph
+              </Link>
+              <Link href="/bookmarks" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+                Bookmarks
+              </Link>
+              <Link href="/submit" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+                Submit
+              </Link>
               <Link href="https://github.com/msg43/GetReceipts" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
                 GitHub
               </Link>

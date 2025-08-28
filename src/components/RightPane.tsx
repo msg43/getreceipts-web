@@ -121,12 +121,16 @@ export function RightPane({ selectedNode, onClose }: RightPaneProps) {
             <h3 className="text-sm font-medium text-slate-700 mb-2">Tags</h3>
             <div className="flex flex-wrap gap-2">
               {selectedNode.tags.map(tag => (
-                <span
+                <Link
                   key={tag}
-                  className="px-2 py-1 bg-slate-100 text-slate-700 rounded-full text-xs"
+                  href={`/tags/${encodeURIComponent(tag)}`}
+                  className="px-2 py-1 bg-gray-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 rounded-full text-xs transition-colors cursor-pointer inline-flex items-center"
                 >
                   {tag}
-                </span>
+                  <svg className="w-2 h-2 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </Link>
               ))}
             </div>
           </div>
