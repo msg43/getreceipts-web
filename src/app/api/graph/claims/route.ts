@@ -12,8 +12,8 @@ export async function GET() {
         title,
         content,
         tags,
-        created_at,
-        metadata
+        metadata,
+        created_at
       `)
       .limit(100);
     

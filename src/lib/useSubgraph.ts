@@ -58,7 +58,9 @@ export function useSubgraph(filters: Filters) {
       }
     }
 
-    fetchSubgraph();
+    fetchSubgraph().catch(error => {
+      console.error('Error in fetchSubgraph useEffect:', error);
+    });
   }, [
     filters.search,
     filters.tags,

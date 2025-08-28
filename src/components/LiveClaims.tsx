@@ -71,7 +71,9 @@ export default function LiveClaims() {
       setLoading(false);
     }, getOptimalTimeout()); // Mobile-optimized timeout
 
-    fetchClaims();
+    fetchClaims().catch(error => {
+      console.error('Error in fetchClaims useEffect:', error);
+    });
 
     return () => {
       controller.abort();

@@ -43,7 +43,9 @@ export default function ClaimGraph({ claimId, height = 600 }: ClaimGraphProps) {
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   
   useEffect(() => {
-    fetchGraphData();
+    fetchGraphData().catch(error => {
+      console.error('Error in fetchGraphData useEffect:', error);
+    });
   }, [claimId]);
   
   const fetchGraphData = async () => {
