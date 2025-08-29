@@ -1,13 +1,15 @@
-description: "Slug stability: one function only; forbid ad-hoc slug code."
+description: "Slug stability: centralized slug generation for consistency and maintainability."
 globs:
   - "src/**/*"
 alwaysApply: true
 
 hardConstraints:
-  - "All slug generation MUST call src/lib/markdown/slug.ts::toSlug."
-  - "Do not inline regex-based slug logic anywhere else."
-  - "If slug behavior changes, update slug.test.ts and note a migration strategy for any persisted slugs."
+  - "For human-readable slugs from text, MUST call src/lib/markdown/slug.ts::toSlug."
+  - "For unique identifiers, nanoid() is acceptable (e.g., claim creation)."
+  - "Do not inline regex-based slug logic for text transformation."
+  - "If slug behavior changes, update slug.test.ts and document migration strategy for persisted slugs."
 
 verificationChecklist:
-  - "Search repo for .replace(/[^a-z0-9]/-style patterns; replace with toSlug()."
-  - "Run slug tests and ensure no changes in expected snapshots."
+  - "Search repo for .replace(/[^a-z0-9]/-style patterns outside of toSlug(); replace with toSlug()."
+  - "Run slug tests and ensure no breaking changes in expected outputs."
+  - "Exception: nanoid() usage for unique IDs is allowed."

@@ -1,2 +1,3 @@
 echo "🔍 Running pre-commit checks..."
 npm run pre-commit
+echo "✅ Pre-commit checks passed!"

@@ -1,18 +1,24 @@
-description: "Schema safety: no ad-hoc DB edits; require migrations, type sync, RPC checks."
+description: "Schema safety: structured migrations with type safety and change tracking."
 globs:
   - "sql/**/*"
   - "src/**/*"
 alwaysApply: true
 
 hardConstraints:
-  - "NEVER edit or drop columns/tables directly in existing SQL files. Create a new, numbered migration in sql/ (e.g., 06_lists.sql)."
-  - "When schema changes, update TS types under src/lib/types*.ts in the SAME change."
-  - "When schema/RPC payloads change, update callers (hooks, API handlers) and add a one-shot backfill or migration note."
-  - "Do not change the RPC name or result shape of public.get_subgraph without updating useSubgraph and GraphData types."
-  - "Do not add client-side SQL. All DB access is via RPCs or server routes."
+  - "Production: NEVER edit existing SQL files. Create new numbered migrations (e.g., 06_lists.sql)."
+  - "When schema changes, update TypeScript types in src/lib/types*.ts in the SAME commit."
+  - "When schema/RPC payloads change, update all callers (hooks, API handlers) and note migration strategy."
+  - "Do not change public.get_subgraph signature without updating useSubgraph and GraphData types."
+  - "All DB access via RPCs or server routes; no client-side SQL."
+
+developmentExceptions:
+  - "Local dev: direct schema edits allowed with team coordination."
+  - "Testing environments: schema resets permitted for rapid iteration."
+
+escapeHatch: "Emergency production fixes allowed with DBA approval and immediate follow-up migration."
 
 verificationChecklist:
-  - "Create a NEW migration file; do not edit previous migrations."
-  - "Run typecheck (tsc) and fix type errors in affected files."
-  - "Search for all references to changed fields and update them."
-  - "Update README_UberPrompt.md with rationale for the migration."
+  - "Create new migration file for production changes."
+  - "Run TypeScript compiler and fix type errors."
+  - "Search codebase for references to changed fields."
+  - "Document migration rationale (recommended: update project docs)."

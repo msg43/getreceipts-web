@@ -1,15 +1,16 @@
-description: "Export must be server-side + non-blocking; return URL/jobId; UI shows toast/spinner."
+description: "Export operations must be server-side and non-blocking for good UX."
 globs:
   - "src/**/*"
 alwaysApply: true
 
 hardConstraints:
-  - "Do NOT implement Markdown export in client components."
-  - "Export endpoint: POST /api/lists/[id]/export returns { downloadUrl } or { jobId }."
-  - "If long-running, upload to Supabase Storage and return a signed URL; do not stream from client."
-  - "UI must display async status (toast/spinner) and never block the main thread."
+  - "Heavy export logic MUST run server-side, not in client components."
+  - "Export endpoints return { downloadUrl } for immediate results OR { jobId } for async processing."
+  - "Long-running exports: use background jobs, store results in configured storage, return signed URLs."
+  - "UI must show loading states (toast/spinner) and never block the main thread."
+  - "Export APIs should follow RESTful patterns: POST /api/[resource]/export or POST /api/export/[type]."
 
 verificationChecklist:
-  - "No heavy export logic in client bundles."
-  - "Export button calls the API and handles async state; success shows a download link."
-  - "Add a small integration test that mocks the route and asserts non-blocking behavior."
+  - "Verify no heavy processing in client-side export code."
+  - "Export UI handles async states gracefully with user feedback."
+  - "Export endpoints return appropriate response format for result type."

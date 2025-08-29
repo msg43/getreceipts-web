@@ -1,4 +1,4 @@
-description: "Preserve public contracts: GraphData, get_subgraph payloads, route signatures."
+description: "Preserve public contracts with versioning support for evolution."
 globs:
   - "src/lib/types.ts"
   - "src/lib/useSubgraph.ts"
@@ -9,8 +9,12 @@ alwaysApply: true
 hardConstraints:
   - "GraphData shape = { nodes: ClaimNode[]; links: ClaimEdge[] } with node.id, link.source, link.target."
   - "get_subgraph returns JSON arrays named exactly nodes, edges, clusters."
-  - "If a contract must change, update ALL consumers and add a migration plan; do not partially change."
+  - "Breaking changes require versioning: maintain backward compatibility for 2+ versions OR provide clear migration path."
+  - "Document breaking changes in CHANGELOG with upgrade instructions."
+
+escapeHatch: "Emergency breaking changes allowed with senior developer approval and immediate hotfix plan."
 
 verificationChecklist:
-  - "Search for GraphData usage; compile green."
-  - "Run the app and confirm both 2D and 3D render with the same dataset."
+  - "Search for GraphData usage; ensure TypeScript compiles."
+  - "Test that both 2D and 3D graphs render without errors."
+  - "For breaking changes: verify migration path exists and is documented."
