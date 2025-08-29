@@ -1,6 +1,6 @@
 // LeftPane.tsx - Filters, show/hide toggles, and bookmarks panel
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import type { Filters, Node } from '@/lib/types';
 import { useBookmarks } from '@/lib/useBookmarks';
@@ -82,7 +82,12 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
     setShowPeople(true);
     setShowSources(true);
     setShowClaims(true);
-    onFiltersChange({ limit: filters.limit });
+    onFiltersChange({ 
+      limit: filters.limit,
+      showPeople: true,
+      showSources: true,
+      showClaims: true
+    });
   };
 
   // Filter nodes by type
@@ -90,15 +95,36 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
   const sourceNodes = data?.nodes.filter(n => n.type === 'source') || [];
   const claimNodes = data?.nodes.filter(n => n.type === 'claim') || [];
 
-  // Update visibility immediately when toggles change
-  useEffect(() => {
+  // Handle show/hide toggle changes
+  const handleShowPeopleChange = (checked: boolean) => {
+    setShowPeople(checked);
+    onFiltersChange({
+      ...filters,
+      showPeople: checked,
+      showSources,
+      showClaims,
+    });
+  };
+
+  const handleShowSourcesChange = (checked: boolean) => {
+    setShowSources(checked);
+    onFiltersChange({
+      ...filters,
+      showPeople,
+      showSources: checked,
+      showClaims,
+    });
+  };
+
+  const handleShowClaimsChange = (checked: boolean) => {
+    setShowClaims(checked);
     onFiltersChange({
       ...filters,
       showPeople,
       showSources,
-      showClaims,
+      showClaims: checked,
     });
-  }, [filters, onFiltersChange, showPeople, showSources, showClaims]);
+  };
 
   return (
     <div className="h-full bg-white rounded-lg shadow-md p-6 overflow-y-auto">
@@ -178,7 +204,7 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
             <input
               type="checkbox"
               checked={showPeople}
-              onChange={(e) => setShowPeople(e.target.checked)}
+              onChange={(e) => handleShowPeopleChange(e.target.checked)}
               className="mr-2"
             />
             <span className="text-sm">People</span>
@@ -187,7 +213,7 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
             <input
               type="checkbox"
               checked={showSources}
-              onChange={(e) => setShowSources(e.target.checked)}
+              onChange={(e) => handleShowSourcesChange(e.target.checked)}
               className="mr-2"
             />
             <span className="text-sm">Sources</span>
@@ -196,7 +222,7 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
             <input
               type="checkbox"
               checked={showClaims}
-              onChange={(e) => setShowClaims(e.target.checked)}
+              onChange={(e) => handleShowClaimsChange(e.target.checked)}
               className="mr-2"
             />
             <span className="text-sm">Claims</span>

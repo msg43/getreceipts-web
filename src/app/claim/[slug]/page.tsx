@@ -1,5 +1,5 @@
 import { 
-  getClaimBySlug, getAggregateByClaimId, getModelReviewsByClaimId, 
+  getClaimBySlug, getModelReviewsByClaimId, 
   getSourcesByClaimId, getPositionsByClaimId, getKnowledgePeopleByClaimId,
   getKnowledgeJargonByClaimId, getKnowledgeModelsByClaimId, 
   getClaimRelationshipsByClaimId, getVotesByClaimId, getCommentsByClaimId
@@ -53,6 +53,43 @@ type Position = {
 // Generate metadata for SEO and social sharing
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
+  
+  // Check if we have the required environment variables for database access
+  const hasDbConfig = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE;
+  
+  if (!hasDbConfig) {
+    // Return generic metadata when building without database access
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://getreceipts-web.vercel.app';
+    const badgeUrl = `${baseUrl}/api/badge/${slug}`;
+    const claimUrl = `${baseUrl}/claim/${slug}`;
+    
+    return {
+      title: `Claim ${slug} - GetReceipts.org`,
+      description: 'View evidence, sources, and positions for this claim.',
+      openGraph: {
+        title: `Claim ${slug}`,
+        description: 'View evidence and sources',
+        url: claimUrl,
+        siteName: 'GetReceipts.org',
+        images: [
+          {
+            url: badgeUrl,
+            width: 420,
+            height: 42,
+            alt: 'Consensus badge',
+          },
+        ],
+        type: 'article',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: `Claim ${slug}`,
+        description: 'View evidence and sources',
+        images: [badgeUrl],
+      },
+    };
+  }
+
   const c = await getClaimBySlug(slug).catch(() => null);
   
   if (!c) {
@@ -117,8 +154,8 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
       getKnowledgeJargonByClaimId(c.id).catch(() => []),
       getKnowledgeModelsByClaimId(c.id).catch(() => []),
       getClaimRelationshipsByClaimId(c.id).catch(() => []),
-      getVotesByClaimId(c.id).catch(() => ({ upvotes: 0, downvotes: 0, credible: 0, not_credible: 0 })),
-      getCommentsByClaimId(c.id).catch(() => [])
+      getVotesByClaimId().catch(() => ({ upvotes: 0, downvotes: 0, credible: 0, not_credible: 0 })),
+      getCommentsByClaimId().catch(() => [])
     ]);
 
   // Generate JSON-LD structured data

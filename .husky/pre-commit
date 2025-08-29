@@ -1,27 +1,5 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
 echo "🔍 Running pre-commit checks..."
-
-# Run linting first (catches ESLint errors)
-echo "📝 Running linter..."
-npm run lint
-if [ $? -ne 0 ]; then
-  echo "❌ Linting failed. Please fix the errors before committing."
-  exit 1
-fi
-
-# Run TypeScript type checking (catches compilation errors)
-echo "🔧 Checking TypeScript types..."
-npx tsc --noEmit
-if [ $? -ne 0 ]; then
-  echo "❌ TypeScript type checking failed. Please fix the errors before committing."
-  exit 1
-fi
-
-# Run tests
-echo "🧪 Running tests..."
-npm test
-if [ $? -ne 0 ]; then
-  echo "❌ Tests failed. Please fix the failing tests before committing."
-  exit 1
-fi
-
-echo "✅ Pre-commit checks passed!"
+npm run pre-commit

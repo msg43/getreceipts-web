@@ -24,7 +24,7 @@ export async function getClaimBySlug(slug: string) {
   return data
 }
 
-export async function getAggregateByClaimId(_claimId: string) {
+export async function getAggregateByClaimId() {
   // Return null since aggregates table doesn't exist yet
   return null
 }
@@ -102,8 +102,7 @@ export async function getClaimRelationshipsByClaimId(claimId: string) {
   return data || []
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function getVotesByClaimId(_claimId: string) {
+export async function getVotesByClaimId() {
   // For demo purposes, return mock data
   // In production, this would query the votes table
   return {
@@ -114,8 +113,7 @@ export async function getVotesByClaimId(_claimId: string) {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function getCommentsByClaimId(_claimId: string) {
+export async function getCommentsByClaimId() {
   // For demo purposes, return mock data
   // In production, this would query the comments table
   return [
