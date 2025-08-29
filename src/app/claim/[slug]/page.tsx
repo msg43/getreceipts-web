@@ -158,6 +158,15 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
       getCommentsByClaimId().catch(() => [])
     ]);
 
+    // Ensure all arrays are actually arrays to prevent iteration errors
+    const safeReviews = Array.isArray(reviews) ? reviews : [];
+    const safeSrcs = Array.isArray(srcs) ? srcs : [];
+    const safePos = Array.isArray(pos) ? pos : [];
+    const safePeople = Array.isArray(people) ? people : [];
+    const safeJargon = Array.isArray(jargon) ? jargon : [];
+    const safeModels = Array.isArray(models) ? models : [];
+    const safeComments = Array.isArray(comments) ? comments : [];
+
   // Generate JSON-LD structured data
   const jsonLd = {
     "@context": "https://schema.org",
@@ -175,7 +184,7 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
       "ratingValue": 0.5, // Default rating since no aggregates table
       "bestRating": 1,
       "worstRating": 0,
-      "ratingExplanation": `Consensus score based on ${srcs.length} sources and ${pos.length} positions`
+      "ratingExplanation": `Consensus score based on ${safeSrcs.length} sources and ${safePos.length} positions`
     },
     "itemReviewed": {
       "@type": "Claim",
@@ -202,7 +211,7 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
               <div className="flex items-center gap-4">
                 <Image alt="Consensus badge" src={`/api/badge/${slug}`} width={420} height={42} className="h-8" />
                 <select className="border rounded px-2 py-1">
-                  {reviews.length ? reviews.map((r: ModelReview) => (
+                  {safeReviews.length ? safeReviews.map((r: ModelReview) => (
                     <option key={r.id}>{r.model} • {Math.round(Number(r.score)*100)}%</option>
                   )) : <option>Waiting for reviews…</option>}
                 </select>
@@ -230,11 +239,11 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
         </div>
 
         {/* Knowledge Artifacts from Knowledge_Chipper */}
-        {(people.length > 0 || jargon.length > 0 || models.length > 0) && (
+        {(safePeople.length > 0 || safeJargon.length > 0 || safeModels.length > 0) && (
           <KnowledgeArtifacts 
-            people={people} 
-            jargon={jargon} 
-            models={models} 
+            people={safePeople} 
+            jargon={safeJargon} 
+            models={safeModels} 
           />
         )}
 
@@ -243,7 +252,7 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
           <div className="p-6 border rounded-lg">
             <h2 className="font-medium mb-3">Evidence</h2>
             <ul className="list-disc pl-5 space-y-1">
-              {srcs.map((s: Source) => (
+              {safeSrcs.map((s: Source) => (
                 <li key={s.id}>
                   <a className="underline" target="_blank" href={s.url ?? "#"} rel="noopener noreferrer">
                     {s.title ?? s.url}
@@ -258,14 +267,14 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
             <h2 className="font-medium mb-3">Positions</h2>
             <div className="space-y-4">
               <div>
-                <h3 className="mb-2 text-green-600 font-medium">Support ({pos.filter((p: Position)=>p.stance==="support").length})</h3>
-                {pos.filter((p: Position)=>p.stance==="support").map((p: Position)=> (
+                <h3 className="mb-2 text-green-600 font-medium">Support ({safePos.filter((p: Position)=>p.stance==="support").length})</h3>
+                {safePos.filter((p: Position)=>p.stance==="support").map((p: Position)=> (
                   <div key={p.id} className="text-sm">• {p.quote ?? "Supporter"}</div>
                 ))}
               </div>
               <div>
-                <h3 className="mb-2 text-red-600 font-medium">Dispute ({pos.filter((p: Position)=>p.stance==="oppose").length})</h3>
-                {pos.filter((p: Position)=>p.stance==="oppose").map((p: Position)=> (
+                <h3 className="mb-2 text-red-600 font-medium">Dispute ({safePos.filter((p: Position)=>p.stance==="oppose").length})</h3>
+                {safePos.filter((p: Position)=>p.stance==="oppose").map((p: Position)=> (
                   <div key={p.id} className="text-sm">• {p.quote ?? "Opponent"}</div>
                 ))}
               </div>
@@ -307,7 +316,7 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
 
         {/* Comments Section */}
         <ErrorBoundary>
-          <CommentsSection claimId={c.id} initialComments={comments} />
+          <CommentsSection claimId={c.id} initialComments={safeComments} />
         </ErrorBoundary>
       </div>
     </>
