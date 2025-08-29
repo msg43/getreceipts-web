@@ -169,16 +169,16 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
         
         {/* Bookmark Filter Tabs */}
         <div className="flex flex-wrap gap-1 mb-3">
-          {[
+          {([
             { key: 'all', label: 'All', count: allBookmarks.length },
             { key: 'claim', label: 'Claims', count: getBookmarksByType('claim').length },
             { key: 'person', label: 'People', count: getBookmarksByType('person').length },
             { key: 'episode', label: 'Episodes', count: getBookmarksByType('episode').length },
             { key: 'tag', label: 'Tags', count: getBookmarksByType('tag').length }
-          ].map(filter => (
+          ] as const).map(filter => (
             <button
               key={filter.key}
-              onClick={() => setBookmarkFilter(filter.key as 'all' | 'claim' | 'person' | 'episode' | 'tag')}
+              onClick={() => setBookmarkFilter(filter.key)}
               className={`px-2 py-1 text-xs rounded transition-colors ${
                 bookmarkFilter === filter.key
                   ? 'bg-blue-100 text-blue-800 border border-blue-200'
