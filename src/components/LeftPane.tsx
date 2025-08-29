@@ -29,6 +29,9 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
   const [sourcesExpanded, setSourcesExpanded] = useState(false);
   const [claimsExpanded, setClaimsExpanded] = useState(false);
 
+  // Bookmark filter state
+  const [bookmarkFilter, setBookmarkFilter] = useState<'all' | 'claim' | 'person' | 'episode' | 'tag'>('all');
+
   // Available options (in real app, fetch from DB)
   const availableTags = ['AI', 'consciousness', 'climate', 'philosophy', 'politics', 'economics', 'quantum', 'privacy'];
   const availableCommunities = [
@@ -39,8 +42,13 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
     { id: 5, name: 'Economics', color: '#F59E0B' },
   ];
 
-  // Get only claim bookmarks for the graph interface
-  const claimBookmarks = getBookmarksByType('claim');
+  // Get bookmarks based on filter
+  const getFilteredBookmarks = () => {
+    if (bookmarkFilter === 'all') return allBookmarks;
+    return getBookmarksByType(bookmarkFilter);
+  };
+
+  const filteredBookmarks = getFilteredBookmarks();
 
   // Add current selection as bookmark
   const addBookmark = () => {
@@ -158,11 +166,37 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
             </button>
           )}
         </div>
+        
+        {/* Bookmark Filter Tabs */}
+        <div className="flex flex-wrap gap-1 mb-3">
+          {[
+            { key: 'all', label: 'All', count: allBookmarks.length },
+            { key: 'claim', label: 'Claims', count: getBookmarksByType('claim').length },
+            { key: 'person', label: 'People', count: getBookmarksByType('person').length },
+            { key: 'episode', label: 'Episodes', count: getBookmarksByType('episode').length },
+            { key: 'tag', label: 'Tags', count: getBookmarksByType('tag').length }
+          ].map(filter => (
+            <button
+              key={filter.key}
+              onClick={() => setBookmarkFilter(filter.key as 'all' | 'claim' | 'person' | 'episode' | 'tag')}
+              className={`px-2 py-1 text-xs rounded transition-colors ${
+                bookmarkFilter === filter.key
+                  ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {filter.label} {filter.count > 0 && `(${filter.count})`}
+            </button>
+          ))}
+        </div>
+
         <div className="space-y-2">
-          {claimBookmarks.length === 0 ? (
-            <p className="text-sm text-slate-500">No claim bookmarks yet</p>
+          {filteredBookmarks.length === 0 ? (
+            <p className="text-sm text-slate-500">
+              No {bookmarkFilter === 'all' ? '' : bookmarkFilter + ' '}bookmarks yet
+            </p>
           ) : (
-            claimBookmarks.map(bookmark => (
+            filteredBookmarks.map(bookmark => (
               <div
                 key={bookmark.id}
                 className="flex justify-between items-center p-2 bg-slate-50 rounded hover:bg-gray-100 group"
@@ -172,6 +206,12 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
                   className="text-sm truncate hover:text-blue-600 transition-colors flex-1"
                   title={bookmark.title}
                 >
+                  <span className="text-xs text-gray-500 mr-2">
+                    {bookmark.type === 'claim' && '📄'}
+                    {bookmark.type === 'person' && '👤'}
+                    {bookmark.type === 'episode' && '🎧'}
+                    {bookmark.type === 'tag' && '🏷️'}
+                  </span>
                   {bookmark.title}
                 </Link>
                 <button
@@ -185,14 +225,12 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
             ))
           )}
           
-          {allBookmarks.length > claimBookmarks.length && (
-            <Link
-              href="/bookmarks"
-              className="block text-xs text-blue-600 hover:text-blue-800 transition-colors mt-2 text-center"
-            >
-              View all bookmarks ({allBookmarks.length}) →
-            </Link>
-          )}
+          <Link
+            href="/bookmarks"
+            className="block text-xs text-blue-600 hover:text-blue-800 transition-colors mt-2 text-center"
+          >
+            View all bookmarks ({allBookmarks.length}) →
+          </Link>
         </div>
       </div>
 
