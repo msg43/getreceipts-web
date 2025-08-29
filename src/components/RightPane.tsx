@@ -49,6 +49,14 @@ export function RightPane({ selectedNode, onClose }: RightPaneProps) {
           </div>
         )}
 
+        {/* Debug test link */}
+        <div className="mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded">
+          <p className="text-xs text-yellow-700 mb-2">Debug test:</p>
+          <Link href="/submit" className="text-blue-600 underline hover:text-blue-800">
+            Test Link (should go to /submit)
+          </Link>
+        </div>
+
         {/* People */}
         {selectedNode.people && selectedNode.people.length > 0 && (
           <div className="mb-4">
@@ -64,6 +72,9 @@ export function RightPane({ selectedNode, onClose }: RightPaneProps) {
                   key={index}
                   href={`/people/${encodeURIComponent(person.toLowerCase().replace(/\s+/g, '-').replace(/\./g, ''))}`}
                   className="inline-flex items-center px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-full text-sm transition-colors cursor-pointer hover:shadow-sm border border-blue-200 hover:border-blue-300"
+                  onClick={(e) => {
+                    console.log('People link clicked:', person, e);
+                  }}
                 >
                   {person}
                   <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,6 +98,9 @@ export function RightPane({ selectedNode, onClose }: RightPaneProps) {
             <Link
               href={`/episode/${selectedNode.episodeSlug}`}
               className="inline-flex items-center px-3 py-2 bg-green-100 hover:bg-green-200 text-green-800 rounded-md text-sm transition-colors cursor-pointer hover:shadow-sm border border-green-200 hover:border-green-300"
+              onClick={(e) => {
+                console.log('Episode link clicked:', selectedNode.episodeSlug, e);
+              }}
             >
               {selectedNode.episode}
               <svg className="w-3 h-3 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
