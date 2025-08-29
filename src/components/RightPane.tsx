@@ -1,8 +1,9 @@
 // RightPane.tsx - Node details panel
 
 import React from 'react';
-import Link from 'next/link';
+
 import type { Node } from '@/lib/types';
+import { toSlug } from '@/lib/markdown/slug';
 
 interface RightPaneProps {
   selectedNode: Node | null;
@@ -64,7 +65,7 @@ export function RightPane({ selectedNode, onClose }: RightPaneProps) {
               {selectedNode.people.map((person, index) => (
                 <a
                   key={index}
-                  href={`/people/${encodeURIComponent(person.toLowerCase().replace(/\s+/g, '-').replace(/\./g, ''))}`}
+                  href={`/people/${encodeURIComponent(toSlug(person))}`}
                   className="inline-flex items-center px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-full text-sm transition-colors cursor-pointer hover:shadow-sm border border-blue-200 hover:border-blue-300"
                   onClick={(e) => {
                     console.log('People link clicked:', person, e);

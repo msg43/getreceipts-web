@@ -1,0 +1,18 @@
+description: "Schema safety: no ad-hoc DB edits; require migrations, type sync, RPC checks."
+globs:
+  - "sql/**/*"
+  - "src/**/*"
+alwaysApply: true
+
+hardConstraints:
+  - "NEVER edit or drop columns/tables directly in existing SQL files. Create a new, numbered migration in sql/ (e.g., 06_lists.sql)."
+  - "When schema changes, update TS types under src/lib/types*.ts in the SAME change."
+  - "When schema/RPC payloads change, update callers (hooks, API handlers) and add a one-shot backfill or migration note."
+  - "Do not change the RPC name or result shape of public.get_subgraph without updating useSubgraph and GraphData types."
+  - "Do not add client-side SQL. All DB access is via RPCs or server routes."
+
+verificationChecklist:
+  - "Create a NEW migration file; do not edit previous migrations."
+  - "Run typecheck (tsc) and fix type errors in affected files."
+  - "Search for all references to changed fields and update them."
+  - "Update README_UberPrompt.md with rationale for the migration."

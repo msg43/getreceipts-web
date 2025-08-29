@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { use } from 'react';
 import { BookmarkButton } from '@/components/BookmarkButton';
+import { toSlug } from '@/lib/markdown/slug';
 
 interface Claim {
   id: string;
@@ -173,7 +174,7 @@ export default function EpisodePage({ params }: EpisodePageProps) {
                 {uniquePeople.map((person, index) => (
                   <Link
                     key={index}
-                    href={`/people/${encodeURIComponent(person.toLowerCase().replace(/\s+/g, '-').replace(/\./g, ''))}`}
+                    href={`/people/${encodeURIComponent(toSlug(person))}`}
                     className="inline-flex items-center px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg text-sm transition-colors"
                   >
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,7 +242,7 @@ export default function EpisodePage({ params }: EpisodePageProps) {
                         {claim.people.slice(0, 3).map((person, index) => (
                           <Link
                             key={index}
-                            href={`/people/${encodeURIComponent(person.toLowerCase().replace(/\s+/g, '-').replace(/\./g, ''))}`}
+                            href={`/people/${encodeURIComponent(toSlug(person))}`}
                             className="text-blue-600 hover:text-blue-800 transition-colors"
                           >
                             {person}

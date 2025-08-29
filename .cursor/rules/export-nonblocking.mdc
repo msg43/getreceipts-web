@@ -1,0 +1,15 @@
+description: "Export must be server-side + non-blocking; return URL/jobId; UI shows toast/spinner."
+globs:
+  - "src/**/*"
+alwaysApply: true
+
+hardConstraints:
+  - "Do NOT implement Markdown export in client components."
+  - "Export endpoint: POST /api/lists/[id]/export returns { downloadUrl } or { jobId }."
+  - "If long-running, upload to Supabase Storage and return a signed URL; do not stream from client."
+  - "UI must display async status (toast/spinner) and never block the main thread."
+
+verificationChecklist:
+  - "No heavy export logic in client bundles."
+  - "Export button calls the API and handles async state; success shows a download link."
+  - "Add a small integration test that mocks the route and asserts non-blocking behavior."

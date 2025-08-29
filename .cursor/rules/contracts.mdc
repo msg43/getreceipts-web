@@ -1,0 +1,16 @@
+description: "Preserve public contracts: GraphData, get_subgraph payloads, route signatures."
+globs:
+  - "src/lib/types.ts"
+  - "src/lib/useSubgraph.ts"
+  - "src/components/**/*"
+  - "sql/**/*"
+alwaysApply: true
+
+hardConstraints:
+  - "GraphData shape = { nodes: ClaimNode[]; links: ClaimEdge[] } with node.id, link.source, link.target."
+  - "get_subgraph returns JSON arrays named exactly nodes, edges, clusters."
+  - "If a contract must change, update ALL consumers and add a migration plan; do not partially change."
+
+verificationChecklist:
+  - "Search for GraphData usage; compile green."
+  - "Run the app and confirm both 2D and 3D render with the same dataset."

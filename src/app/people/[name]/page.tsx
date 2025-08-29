@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { use } from 'react';
 import { BookmarkButton } from '@/components/BookmarkButton';
+import { toSlug } from '@/lib/markdown/slug';
 
 interface Claim {
   id: string;
@@ -52,7 +53,7 @@ export default function PeoplePage({ params }: PeoplePageProps) {
         // Filter claims that include this person
         const personClaims = data.nodes.filter((claim: Claim) => 
           claim.people && claim.people.some((person: string) => 
-            person.toLowerCase().replace(/\s+/g, '-').replace(/\./g, '') === name
+            toSlug(person) === name
           )
         );
         
