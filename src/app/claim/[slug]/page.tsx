@@ -165,6 +165,7 @@ export default async function ClaimPage({ params }: { params: Promise<{ slug: st
     const safePeople = Array.isArray(people) ? people : [];
     const safeJargon = Array.isArray(jargon) ? jargon : [];
     const safeModels = Array.isArray(models) ? models : [];
+    const safeRelationships = Array.isArray(relationships) ? relationships : [];
     const safeComments = Array.isArray(comments) ? comments : [];
 
   // Generate JSON-LD structured data

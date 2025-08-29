@@ -85,7 +85,7 @@ export function RightPane({ selectedNode, onClose }: RightPaneProps) {
           <div className="mb-4">
             <h4 className="text-sm font-medium text-slate-700 mb-2 flex items-center">
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 12.464l-9.192 9.192M12 2.25L2.464 11.786M21.75 12L12.214 21.536" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
               </svg>
               Episode
             </h4>
@@ -129,13 +129,13 @@ export function RightPane({ selectedNode, onClose }: RightPaneProps) {
             <h3 className="text-sm font-medium text-slate-700 mb-2">Tags</h3>
             <div className="flex flex-wrap gap-2">
               {selectedNode.tags.map(tag => (
-                <Link
+                <a
                   key={tag}
                   href={`/tags/${encodeURIComponent(tag)}`}
-                  className="px-2 py-1 bg-gray-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 rounded-full text-xs transition-colors cursor-pointer hover:shadow-sm border border-gray-200 hover:border-gray-300"
+                  className="inline-flex items-center px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-full text-xs transition-colors cursor-pointer hover:shadow-sm border border-blue-200 hover:border-blue-300"
                 >
                   {tag}
-                </Link>
+                </a>
               ))}
             </div>
           </div>
@@ -172,12 +172,12 @@ export function RightPane({ selectedNode, onClose }: RightPaneProps) {
 
       {/* Actions */}
       <div className="mt-6 pt-6 border-t">
-        <Link 
+        <a 
           href={`/claim/${selectedNode.slug}`}
           className="block w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-center cursor-pointer"
         >
           View Full Claim
-        </Link>
+        </a>
       </div>
     </div>
   );
