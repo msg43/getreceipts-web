@@ -63,13 +63,31 @@ export default function ClaimGraph({ claimId, height = 600 }: ClaimGraphProps) {
         throw new Error('Invalid graph data received');
       }
       
-      setData(graphData);
+      // Transform API response format (edges) to ClaimGraph format (links)
+      const transformedData = {
+        nodes: graphData.nodes || [],
+        links: (graphData.edges || []).map((edge: { id: string; source: string; target: string; type: string; weight?: number; evidence?: string }) => ({
+          id: edge.id,
+          source: edge.source,
+          target: edge.target,
+          type: edge.type,
+          strength: edge.weight || 0.5,
+          evidence: edge.evidence || undefined
+        })),
+        metadata: graphData.metadata || {
+          total_claims: 0,
+          total_relationships: 0,
+          relationship_types: []
+        }
+      };
+      
+      setData(transformedData);
     } catch (error) {
       console.error('Error fetching graph data:', error);
       // Set empty data to prevent rendering issues
       setData({
         nodes: [],
-        links: [],
+        links: [], // Correct for ClaimGraph's local GraphData interface
         metadata: {
           total_claims: 0,
           total_relationships: 0,
@@ -84,18 +102,30 @@ export default function ClaimGraph({ claimId, height = 600 }: ClaimGraphProps) {
   useEffect(() => {
     if (!data || !svgRef.current) return;
     
-    const svg = d3.select(svgRef.current);
-    svg.selectAll("*").remove(); // Clear previous content
+    // Defensive checks to prevent iterator errors
+    if (!Array.isArray(data.nodes) || !Array.isArray(data.links)) {
+      console.warn('ClaimGraph: Invalid data structure', { data });
+      return;
+    }
     
-    const width = 800;
-    const containerHeight = height;
-    
-    // Create simulation
-    const simulation = d3.forceSimulation(data.nodes)
-      .force("link", d3.forceLink<GraphNode, GraphLink>(data.links).id(d => d.id).distance(100))
-      .force("charge", d3.forceManyBody().strength(-300))
-      .force("center", d3.forceCenter(width / 2, containerHeight / 2))
-      .force("collision", d3.forceCollide<GraphNode>().radius(d => d.size + 5));
+    try {
+      const svg = d3.select(svgRef.current);
+      svg.selectAll("*").remove(); // Clear previous content
+      
+      const width = 800;
+      const containerHeight = height;
+      
+      // Create simulation with additional safety checks
+      if (data.nodes.length === 0) {
+        console.warn('ClaimGraph: No nodes to render');
+        return;
+      }
+      
+      const simulation = d3.forceSimulation(data.nodes)
+        .force("link", d3.forceLink<GraphNode, GraphLink>(data.links).id(d => d.id).distance(100))
+        .force("charge", d3.forceManyBody().strength(-300))
+        .force("center", d3.forceCenter(width / 2, containerHeight / 2))
+        .force("collision", d3.forceCollide<GraphNode>().radius(d => d.size + 5));
     
     // Create arrow markers for directed edges
     svg.append("defs").selectAll("marker")
@@ -208,6 +238,10 @@ export default function ClaimGraph({ claimId, height = 600 }: ClaimGraphProps) {
       if (!event.active) simulation.alphaTarget(0);
       d.fx = null;
       d.fy = null;
+    }
+    
+    } catch (error) {
+      console.error('ClaimGraph: Error rendering D3 visualization', error);
     }
     
   }, [data, height, claimId]);

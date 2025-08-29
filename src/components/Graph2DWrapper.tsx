@@ -36,10 +36,32 @@ export function Graph2DWrapper(props: Graph2DWrapperProps) {
     setIsClient(true);
   }, []);
 
+  // Additional validation for the data prop
+  const isValidData = props.data && 
+    Array.isArray(props.data.nodes) && 
+    Array.isArray(props.data.edges) &&
+    props.data.nodes.length >= 0 && 
+    props.data.edges.length >= 0;
+
   if (!isClient) {
     return (
       <div className="h-full w-full bg-slate-50 rounded-lg flex items-center justify-center">
         <div className="text-slate-500">Initializing...</div>
+      </div>
+    );
+  }
+
+  if (!isValidData) {
+    console.warn('Graph2DWrapper: Invalid data provided', props.data);
+    return (
+      <div className="h-full w-full bg-slate-50 rounded-lg flex items-center justify-center">
+        <div className="text-center text-slate-600">
+          <svg className="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p className="font-medium">No Graph Data</p>
+          <p className="text-sm mt-2">Waiting for valid graph data...</p>
+        </div>
       </div>
     );
   }
