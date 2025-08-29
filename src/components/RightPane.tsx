@@ -63,7 +63,7 @@ export function RightPane({ selectedNode, onClose }: RightPaneProps) {
                 <Link
                   key={index}
                   href={`/people/${encodeURIComponent(person.toLowerCase().replace(/\s+/g, '-').replace(/\./g, ''))}`}
-                  className="inline-flex items-center px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-full text-sm transition-colors"
+                  className="inline-flex items-center px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-full text-sm transition-colors cursor-pointer hover:shadow-sm border border-blue-200 hover:border-blue-300"
                 >
                   {person}
                   <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,7 +86,7 @@ export function RightPane({ selectedNode, onClose }: RightPaneProps) {
             </h4>
             <Link
               href={`/episode/${selectedNode.episodeSlug}`}
-              className="inline-flex items-center px-3 py-2 bg-green-100 hover:bg-green-200 text-green-800 rounded-md text-sm transition-colors"
+              className="inline-flex items-center px-3 py-2 bg-green-100 hover:bg-green-200 text-green-800 rounded-md text-sm transition-colors cursor-pointer hover:shadow-sm border border-green-200 hover:border-green-300"
             >
               {selectedNode.episode}
               <svg className="w-3 h-3 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,7 +124,7 @@ export function RightPane({ selectedNode, onClose }: RightPaneProps) {
                 <Link
                   key={tag}
                   href={`/tags/${encodeURIComponent(tag)}`}
-                  className="px-2 py-1 bg-gray-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 rounded-full text-xs transition-colors cursor-pointer"
+                  className="px-2 py-1 bg-gray-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 rounded-full text-xs transition-colors cursor-pointer hover:shadow-sm border border-gray-200 hover:border-gray-300"
                 >
                   {tag}
                 </Link>
@@ -166,7 +166,7 @@ export function RightPane({ selectedNode, onClose }: RightPaneProps) {
       <div className="mt-6 pt-6 border-t">
         <Link 
           href={`/claim/${selectedNode.slug}`}
-          className="block w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-center"
+          className="block w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-center cursor-pointer"
         >
           View Full Claim
         </Link>
