@@ -27,20 +27,13 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
-    - name: Run type check
-      run: npm run type-check
-      
-    - name: Run linter
-      run: npm run lint -- --max-warnings 0
-      
-    - name: Run tests
-      run: npm run test
-      
-    - name: Build application
-      run: npm run build
+    - name: Run CI checks
+      run: npm run ci
       env:
         NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
-        SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE || 'placeholder-key' }}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+        SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE || 'placeholder-service-key' }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://placeholder:placeholder@placeholder.supabase.co:5432/postgres' }}
         NEXT_PUBLIC_SITE_URL: https://getreceipts-web.vercel.app
       
     - name: Upload build artifacts
