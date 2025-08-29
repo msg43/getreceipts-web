@@ -62,11 +62,12 @@ export async function GET() {
       };
     });
     
-    const links = (relationshipsData || []).map(rel => ({
+    const links = (relationshipsData || []).map((rel, index) => ({
+      id: `edge-${rel.source_id}-${rel.target_id}-${index}`,
       source: rel.source_id,
       target: rel.target_id,
-      type: rel.edge_type,
-      strength: Number(rel.weight || 0.5)
+      type: rel.edge_type || 'related',
+      weight: Number(rel.weight || 0.5)
     }));
     
     return NextResponse.json({
