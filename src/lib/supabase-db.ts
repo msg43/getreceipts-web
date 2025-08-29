@@ -3,16 +3,41 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE
 
+// Check if we're in a build/CI environment without proper credentials
+const isBuildTime = process.env.NODE_ENV === 'production' && (!supabaseUrl || !supabaseServiceKey)
+
 if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('❌ Missing required Supabase environment variables')
-  throw new Error('Missing Supabase configuration. Please check NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE environment variables.')
+  if (isBuildTime) {
+    console.log('🔧 Using placeholder Supabase client for build/CI environment')
+  } else {
+    console.error('❌ Missing required Supabase environment variables')
+    throw new Error('Missing Supabase configuration. Please check NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE environment variables.')
+  }
 }
 
-export const supabase = createClient(supabaseUrl, supabaseServiceKey)
+// Use placeholder values for build time or real values for runtime
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseServiceKey || 'placeholder-key'
+)
 
 // Helper functions for database operations
 export async function getClaimBySlug(slug: string) {
   console.log('Fetching claim by slug:', slug)
+  
+  // Return mock data during build time
+  if (isBuildTime) {
+    return {
+      id: 'mock-claim-id',
+      slug: slug,
+      claim_text: 'Mock claim for build environment',
+      author_name: 'Build Author',
+      author_url: 'https://example.com',
+      episode_title: 'Mock Episode',
+      episode_url: 'https://example.com/episode',
+      created_at: new Date().toISOString()
+    }
+  }
   
   const { data, error } = await supabase
     .from('claims')
@@ -30,6 +55,10 @@ export async function getAggregateByClaimId() {
 }
 
 export async function getModelReviewsByClaimId(claimId: string) {
+  if (isBuildTime) {
+    return []
+  }
+  
   const { data, error } = await supabase
     .from('model_reviews')
     .select('*')
@@ -40,6 +69,10 @@ export async function getModelReviewsByClaimId(claimId: string) {
 }
 
 export async function getSourcesByClaimId(claimId: string) {
+  if (isBuildTime) {
+    return []
+  }
+  
   const { data, error } = await supabase
     .from('sources')
     .select('*')
@@ -50,6 +83,10 @@ export async function getSourcesByClaimId(claimId: string) {
 }
 
 export async function getPositionsByClaimId(claimId: string) {
+  if (isBuildTime) {
+    return []
+  }
+  
   const { data, error } = await supabase
     .from('positions')
     .select('*')
@@ -60,6 +97,10 @@ export async function getPositionsByClaimId(claimId: string) {
 }
 
 export async function getKnowledgePeopleByClaimId(claimId: string) {
+  if (isBuildTime) {
+    return []
+  }
+  
   const { data, error } = await supabase
     .from('knowledge_people')
     .select('*')
@@ -70,6 +111,10 @@ export async function getKnowledgePeopleByClaimId(claimId: string) {
 }
 
 export async function getKnowledgeJargonByClaimId(claimId: string) {
+  if (isBuildTime) {
+    return []
+  }
+  
   const { data, error } = await supabase
     .from('knowledge_jargon')
     .select('*')
@@ -80,6 +125,10 @@ export async function getKnowledgeJargonByClaimId(claimId: string) {
 }
 
 export async function getKnowledgeModelsByClaimId(claimId: string) {
+  if (isBuildTime) {
+    return []
+  }
+  
   const { data, error } = await supabase
     .from('knowledge_models')
     .select('*')
@@ -90,6 +139,10 @@ export async function getKnowledgeModelsByClaimId(claimId: string) {
 }
 
 export async function getClaimRelationshipsByClaimId(claimId: string) {
+  if (isBuildTime) {
+    return []
+  }
+  
   const { data, error } = await supabase
     .from('claim_relationships')
     .select(`
