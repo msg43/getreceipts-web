@@ -1,7 +1,6 @@
 // layout.tsx - Graph route layout
 
 import type { Metadata } from 'next';
-import './graph.module.css';
 
 export const metadata: Metadata = {
   title: 'Claims Graph Explorer - Skip the Podcast',
