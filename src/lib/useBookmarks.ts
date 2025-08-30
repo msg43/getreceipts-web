@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Bookmark } from '@/lib/types';
+import { 
+  downloadBookmarksAsJSON, 
+  downloadBookmarkAsMarkdown, 
+  downloadBookmarksAsMarkdownZip 
+} from '@/lib/downloadUtils';
 
 const BOOKMARKS_STORAGE_KEY = 'getreceipts-bookmarks';
 
@@ -90,7 +95,7 @@ export function useBookmarks() {
     saveBookmarks([]);
   };
 
-  // Export bookmarks as JSON
+  // Export bookmarks as JSON string (for clipboard)
   const exportBookmarks = (): string => {
     return JSON.stringify(bookmarks, null, 2);
   };
@@ -109,6 +114,21 @@ export function useBookmarks() {
     }
   };
 
+  // Download bookmarks as JSON file
+  const downloadAsJSON = () => {
+    downloadBookmarksAsJSON(bookmarks);
+  };
+
+  // Download a single bookmark as Markdown
+  const downloadBookmarkMD = (bookmark: Bookmark) => {
+    downloadBookmarkAsMarkdown(bookmark);
+  };
+
+  // Download all bookmarks as individual Markdown files
+  const downloadAllAsMarkdown = () => {
+    downloadBookmarksAsMarkdownZip(bookmarks);
+  };
+
   return {
     bookmarks,
     addBookmark,
@@ -120,6 +140,9 @@ export function useBookmarks() {
     clearAllBookmarks,
     exportBookmarks,
     importBookmarks,
+    downloadAsJSON,
+    downloadBookmarkMD,
+    downloadAllAsMarkdown,
     totalCount: bookmarks.length,
   };
 }

@@ -15,6 +15,9 @@ export default function BookmarksPage() {
     getBookmarksByType,
     exportBookmarks,
     importBookmarks,
+    downloadAsJSON,
+    downloadBookmarkMD,
+    downloadAllAsMarkdown,
     totalCount 
   } = useBookmarks();
   
@@ -122,18 +125,45 @@ export default function BookmarksPage() {
             <CardHeader>
               <h3 className="text-lg font-semibold">Import/Export Bookmarks</h3>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <div>
-                <button
-                  onClick={handleExport}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors mr-2"
-                >
-                  Export to Clipboard
-                </button>
-                <span className="text-sm text-slate-500">Copy all bookmarks as JSON</span>
+                <h4 className="font-medium text-slate-900 mb-3">Export Options</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <button
+                      onClick={handleExport}
+                      className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                      📋 Copy JSON to Clipboard
+                    </button>
+                    <p className="text-xs text-slate-500">Copy all bookmarks as JSON text</p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <button
+                      onClick={downloadAsJSON}
+                      className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                    >
+                      📄 Download JSON File
+                    </button>
+                    <p className="text-xs text-slate-500">Download as .json file</p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <button
+                      onClick={downloadAllAsMarkdown}
+                      className="w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
+                      disabled={totalCount === 0}
+                    >
+                      📝 Download All as Markdown
+                    </button>
+                    <p className="text-xs text-slate-500">Individual .md files with YAML frontmatter</p>
+                  </div>
+                </div>
               </div>
               
               <div>
+                <h4 className="font-medium text-slate-900 mb-3">Import Bookmarks</h4>
                 <textarea
                   value={importText}
                   onChange={(e) => setImportText(e.target.value)}
@@ -239,15 +269,27 @@ export default function BookmarksPage() {
                       )}
                     </div>
                     
-                    <button
-                      onClick={() => removeBookmark(bookmark.id)}
-                      className="p-1 text-slate-400 hover:text-red-500 transition-colors"
-                      title="Remove bookmark"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => downloadBookmarkMD(bookmark)}
+                        className="p-1 text-slate-400 hover:text-blue-500 transition-colors"
+                        title="Download as Markdown"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </button>
+                      
+                      <button
+                        onClick={() => removeBookmark(bookmark.id)}
+                        className="p-1 text-slate-400 hover:text-red-500 transition-colors"
+                        title="Remove bookmark"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </CardHeader>
                 

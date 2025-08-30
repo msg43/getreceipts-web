@@ -2,8 +2,8 @@
 major = 1
 minor = 0
 patch = 0
-build = 9
+build = 10
 
 [metadata]
-last_updated = "2025-08-26"
+last_updated = "2025-08-30"
 description = "GetReceipts.org - Claim Receipt Platform"

@@ -14,7 +14,7 @@ interface LeftPaneProps {
 }
 
 export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNodeSelect }: LeftPaneProps) {
-  const { bookmarks: allBookmarks, addBookmark: addNewBookmark, removeBookmark, getBookmarksByType } = useBookmarks();
+  const { bookmarks: allBookmarks, addBookmark: addNewBookmark, removeBookmark, getBookmarksByType, downloadAsJSON } = useBookmarks();
   const [localSearch, setLocalSearch] = useState(filters.search || '');
   const [selectedTags, setSelectedTags] = useState<string[]>(filters.tags || []);
   const [selectedCommunities, setSelectedCommunities] = useState<number[]>(filters.communities || []);
@@ -157,14 +157,25 @@ export function LeftPane({ filters, onFiltersChange, selectedNodeId, data, onNod
       <div className="mb-6 pb-6 border-b">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-medium text-slate-900">Bookmarks</h3>
-          {selectedNodeId && (
-            <button
-              onClick={addBookmark}
-              className="text-sm text-blue-500 hover:text-blue-600"
-            >
-              + Add Current
-            </button>
-          )}
+          <div className="flex gap-2 items-center">
+            {allBookmarks.length > 0 && (
+              <button
+                onClick={downloadAsJSON}
+                className="text-xs text-slate-500 hover:text-slate-700 p-1"
+                title="Download bookmarks as JSON"
+              >
+                📄
+              </button>
+            )}
+            {selectedNodeId && (
+              <button
+                onClick={addBookmark}
+                className="text-sm text-blue-500 hover:text-blue-600"
+              >
+                + Add Current
+              </button>
+            )}
+          </div>
         </div>
         
         {/* Bookmark Filter Tabs */}
