@@ -8,7 +8,10 @@ const isBuildTime = process.env.NODE_ENV === 'production' && (!supabaseUrl || !s
 
 if (!supabaseUrl || !supabaseServiceKey) {
   if (isBuildTime) {
-    console.log('🔧 Using placeholder Supabase client for build/CI environment')
+    // Silently use placeholder during build - no need to log spam
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔧 Using placeholder Supabase client for build/CI environment')
+    }
   } else {
     console.error('❌ Missing required Supabase environment variables')
     throw new Error('Missing Supabase configuration. Please check NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE environment variables.')
@@ -23,7 +26,9 @@ export const supabase = createClient(
 
 // Helper functions for database operations
 export async function getClaimBySlug(slug: string) {
-  console.log('Fetching claim by slug:', slug)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Fetching claim by slug:', slug)
+  }
   
   // Return mock data during build time
   if (isBuildTime) {
