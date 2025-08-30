@@ -17,7 +17,7 @@ interface ForceNode extends Node3D {
 interface ForceLink {
   source: string | ForceNode;
   target: string | ForceNode;
-  type: 'supports' | 'refutes' | 'related';
+  type: 'supports' | 'refutes' | 'related' | 'contradicts' | 'extends' | 'contextualizes';
   weight: number;
   color: string;
   opacity: number;
@@ -54,7 +54,10 @@ export function Graph3D({ data, selectedNodeId, onNodeSelect }: Graph3DProps) {
       source: edge.source,
       target: edge.target,
       color: edge.type === 'supports' ? '#10B981' : 
-             edge.type === 'refutes' ? '#EF4444' : '#6B7280',
+             edge.type === 'refutes' ? '#EF4444' : 
+             edge.type === 'contradicts' ? '#EF4444' :
+             edge.type === 'extends' ? '#3B82F6' :
+             edge.type === 'contextualizes' ? '#F59E0B' : '#6B7280',
       opacity: 0.6,
       width: edge.weight * 2,
     }));

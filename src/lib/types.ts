@@ -24,7 +24,7 @@ export interface Edge {
   id: string;
   source: string;
   target: string;
-  type: 'supports' | 'refutes' | 'related';
+  type: 'supports' | 'refutes' | 'related' | 'contradicts' | 'extends' | 'contextualizes';
   weight: number;
 }
 

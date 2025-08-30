@@ -128,11 +128,16 @@ function GraphLoader({ data, selectedNodeId }: { data: GraphData; selectedNodeId
       // Extract semantic type before spreading to avoid Sigma.js type conflicts
       const { type: semanticType, ...nodeWithoutType } = node;
       
+      // Create better initial positioning with more spread
+      const spreadMultiplier = Math.sqrt(data.nodes.length) * 100; // Scale with number of nodes
+      const angle = Math.random() * 2 * Math.PI;
+      const radius = Math.random() * spreadMultiplier + 50;
+      
       graph.addNode(node.id, {
         ...nodeWithoutType,
-        x: node.x || Math.random() * 1000,
-        y: node.y || Math.random() * 1000,
-        size: node.size || 10,
+        x: node.x || Math.cos(angle) * radius,
+        y: node.y || Math.sin(angle) * radius,
+        size: node.size || 15, // Slightly larger default size
         color: node.color || '#666666',
         label: node.label,
         // Store semantic type under a different property name
@@ -152,9 +157,12 @@ function GraphLoader({ data, selectedNodeId }: { data: GraphData; selectedNodeId
           id: edge.id,
           edgeType: edge.type, // Store our semantic type in a different attribute
           weight: edge.weight || 1,
-          size: (edge.weight || 1) * 2,
+          size: Math.max(1, (edge.weight || 0.5) * 3), // Make edges more visible
           color: edge.type === 'supports' ? '#10B981' : 
-                 edge.type === 'refutes' ? '#EF4444' : '#6B7280',
+                 edge.type === 'refutes' ? '#EF4444' : 
+                 edge.type === 'contradicts' ? '#EF4444' :
+                 edge.type === 'extends' ? '#3B82F6' :
+                 edge.type === 'contextualizes' ? '#F59E0B' : '#6B7280',
         });
       }
     });
@@ -166,12 +174,17 @@ function GraphLoader({ data, selectedNodeId }: { data: GraphData; selectedNodeId
       try {
         // Apply ForceAtlas2 layout for physics simulation
         forceAtlas2.assign(graph, {
-          iterations: 50,
+          iterations: 200, // More iterations for better positioning
           settings: {
-            gravity: 1,
-            scalingRatio: 10,
-            strongGravityMode: true,
-            barnesHutOptimize: false,
+            gravity: 0.5, // Lower gravity to allow more spread
+            scalingRatio: 50, // Higher scaling for more spread
+            strongGravityMode: false, // Allow more natural distribution
+            barnesHutOptimize: true, // Enable optimization for performance
+            barnesHutTheta: 1.2, // Optimize Barnes-Hut approximation
+            edgeWeightInfluence: 1, // Use edge weights for positioning
+            adjustSizes: false,
+            outboundAttractionDistribution: false,
+            linLogMode: false,
           }
         });
       } catch (error) {
@@ -184,8 +197,34 @@ function GraphLoader({ data, selectedNodeId }: { data: GraphData; selectedNodeId
       if (sigma) {
         try {
           if (!selectedNodeId) {
-            // Fit the whole graph in view
-            sigma.getCamera().setState({ x: 0, y: 0, ratio: 0.8 });
+            // Calculate bounding box and fit graph properly
+            const nodes = graph.nodes();
+            if (nodes.length > 0) {
+              let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+              
+              nodes.forEach(nodeId => {
+                const attrs = graph.getNodeAttributes(nodeId);
+                minX = Math.min(minX, attrs.x);
+                maxX = Math.max(maxX, attrs.x);
+                minY = Math.min(minY, attrs.y);
+                maxY = Math.max(maxY, attrs.y);
+              });
+              
+              const centerX = (minX + maxX) / 2;
+              const centerY = (minY + maxY) / 2;
+              const width = maxX - minX;
+              const height = maxY - minY;
+              const padding = 100;
+              const ratio = Math.max(width, height) / Math.min(sigma.getContainer().offsetWidth, sigma.getContainer().offsetHeight) + padding / 1000;
+              
+              sigma.getCamera().setState({ 
+                x: centerX, 
+                y: centerY, 
+                ratio: Math.max(0.1, Math.min(2.0, ratio))
+              });
+            } else {
+              sigma.getCamera().setState({ x: 0, y: 0, ratio: 1.0 });
+            }
           } else {
             // Center on selected node
             const nodePosition = sigma.getNodeDisplayData(selectedNodeId);
@@ -197,7 +236,7 @@ function GraphLoader({ data, selectedNodeId }: { data: GraphData; selectedNodeId
           console.error('Graph2D: Error setting camera position', error);
         }
       }
-    }, 200);
+    }, 300); // Slightly longer delay to allow layout to settle
 
     // Handle selection highlighting
     if (selectedNodeId && graph.hasNode(selectedNodeId)) {
