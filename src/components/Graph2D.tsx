@@ -5,7 +5,6 @@ import { SigmaContainer, useLoadGraph, useRegisterEvents, useSigma } from '@reac
 import '@react-sigma/core/lib/style.css';
 import Graph from 'graphology';
 import forceAtlas2 from 'graphology-layout-forceatlas2';
-import { Coordinates } from 'sigma/types';
 import type { GraphData, Node } from '@/lib/types';
 
 interface Graph2DProps {
@@ -265,10 +264,10 @@ export function Graph2D({ data, selectedNodeId, onNodeSelect }: Graph2DProps) {
     // Force layout settings for physics
     enableEdgeHoverEvent: true,
     enableEdgeClickEvent: true,
-    nodeReducer: (node: string, data: any) => {
+    nodeReducer: (node: string, data: { highlighted?: boolean; [key: string]: unknown }) => {
       return { ...data, zIndex: data.highlighted ? 2 : 1 };
     },
-    edgeReducer: (edge: string, data: { color: string; hidden?: boolean; [key: string]: unknown }) => {
+    edgeReducer: (edge: string, data: { color: string; hidden?: boolean; size?: number; [key: string]: unknown }) => {
       if (data.hidden) {
         return { ...data, color: 'transparent' };
       }
@@ -276,7 +275,7 @@ export function Graph2D({ data, selectedNodeId, onNodeSelect }: Graph2DProps) {
       return { 
         ...data, 
         color: data.color,
-        size: Math.max(1, (data.size || 1)),
+        size: Math.max(1, Number(data.size || 1)),
         zIndex: 1
       };
     },

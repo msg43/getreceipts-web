@@ -1,21 +1,42 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Graph2DWrapper } from './Graph2DWrapper';
 import type { GraphData, Node } from '@/lib/types';
 
+interface ApiNode {
+  id: string;
+  slug?: string;
+  text?: string;
+  title?: string;
+  content?: string;
+  tags?: string[];
+  consensus?: number;
+  size?: number;
+  metadata?: Record<string, unknown>;
+  createdAt?: string;
+  community?: number;
+  people?: string[];
+  episode?: string;
+  episodeSlug?: string;
+  x?: number;
+  y?: number;
+}
+
+interface ApiEdge {
+  id: string;
+  source: string;
+  target: string;
+  type: string;
+  weight?: number;
+  evidence?: string;
+}
+
 interface ClaimGraphData {
   nodes: Node[];
-  edges: Array<{
-    id: string;
-    source: string;
-    target: string;
-    type: string;
-    weight?: number;
-    evidence?: string;
-  }>;
+  edges: ApiEdge[];
   metadata: {
     total_claims: number;
     total_relationships: number;
@@ -34,13 +55,7 @@ export default function ClaimGraph({ claimId, height = 600 }: ClaimGraphProps) {
   const [loading, setLoading] = useState(true);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   
-  useEffect(() => {
-    fetchGraphData().catch(error => {
-      console.error('Error in fetchGraphData useEffect:', error);
-    });
-  }, [claimId]);
-  
-  const fetchGraphData = async () => {
+  const fetchGraphData = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/graph/claims');
@@ -70,13 +85,30 @@ export default function ClaimGraph({ claimId, height = 600 }: ClaimGraphProps) {
       
       // Transform to Graph2D format
       const graph2DData: GraphData = {
-        nodes: (graphData.nodes || []).map((node: any) => ({
-          ...node,
-          label: node.text || node.title || node.label,
+        nodes: (graphData.nodes || []).map((node: ApiNode) => ({
+          id: node.id,
+          slug: node.slug || '',
+          label: node.text || node.title || '',
+          title: node.title || node.text || '',
+          content: node.content || '',
           size: 15,
-          color: claimId && node.id === claimId ? '#8b5cf6' : '#3B82F6'
+          color: claimId && node.id === claimId ? '#8b5cf6' : '#3B82F6',
+          community: node.community || 1,
+          tags: node.tags || [],
+          metadata: {
+            ...node.metadata,
+            consensus: node.consensus || 0.5,
+            text: node.text,
+          },
+          createdAt: node.createdAt || new Date().toISOString(),
+          type: 'claim' as const,
+          people: node.people || [],
+          episode: node.episode,
+          episodeSlug: node.episodeSlug,
+          x: node.x,
+          y: node.y
         })),
-        edges: (graphData.edges || []).map((edge: any) => ({
+        edges: (graphData.edges || []).map((edge: ApiEdge) => ({
           ...edge,
           color: edge.type === 'supports' ? '#22c55e' : 
                  edge.type === 'contradicts' ? '#ef4444' : 
@@ -107,7 +139,13 @@ export default function ClaimGraph({ claimId, height = 600 }: ClaimGraphProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [claimId]);
+
+  useEffect(() => {
+    fetchGraphData().catch(error => {
+      console.error('Error in fetchGraphData useEffect:', error);
+    });
+  }, [fetchGraphData]);
   
   // Handle node selection from the graph
   const handleNodeSelect = (nodeId: string | null, node: Node | null) => {
@@ -183,11 +221,11 @@ export default function ClaimGraph({ claimId, height = 600 }: ClaimGraphProps) {
           {selectedNode && (
             <div className="mt-4 p-4 border rounded-lg bg-slate-50">
               <h4 className="font-semibold mb-2">Selected Claim</h4>
-              <p className="text-sm mb-2">{selectedNode.label || selectedNode.text || 'No description'}</p>
+              <p className="text-sm mb-2">{selectedNode.label || selectedNode.title || selectedNode.content || 'No description'}</p>
               <div className="flex gap-2">
-                {selectedNode.consensus && (
+                {selectedNode.metadata?.consensus && (
                   <Badge variant="outline">
-                    Consensus: {Math.round(Number(selectedNode.consensus) * 100)}%
+                    Consensus: {Math.round(Number(selectedNode.metadata.consensus) * 100)}%
                   </Badge>
                 )}
                 {selectedNode.slug && (
