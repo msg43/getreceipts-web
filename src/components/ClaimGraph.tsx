@@ -1,29 +1,21 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import * as d3 from 'd3';
-import { SimulationNodeDatum, SimulationLinkDatum } from 'd3';
+import { useEffect, useState } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Graph2DWrapper } from './Graph2DWrapper';
+import type { GraphData, Node } from '@/lib/types';
 
-interface GraphNode extends SimulationNodeDatum {
-  id: string;
-  slug: string;
-  text: string;
-  topics: string[];
-  consensus: number;
-  size: number;
-}
-
-interface GraphLink extends SimulationLinkDatum<GraphNode> {
-  type: string;
-  strength: number;
-  evidence?: string;
-}
-
-interface GraphData {
-  nodes: GraphNode[];
-  links: GraphLink[];
+interface ClaimGraphData {
+  nodes: Node[];
+  edges: Array<{
+    id: string;
+    source: string;
+    target: string;
+    type: string;
+    weight?: number;
+    evidence?: string;
+  }>;
   metadata: {
     total_claims: number;
     total_relationships: number;
@@ -37,10 +29,10 @@ interface ClaimGraphProps {
 }
 
 export default function ClaimGraph({ claimId, height = 600 }: ClaimGraphProps) {
-  const svgRef = useRef<SVGSVGElement>(null);
-  const [data, setData] = useState<GraphData | null>(null);
+  const [data, setData] = useState<ClaimGraphData | null>(null);
+  const [graphData, setGraphData] = useState<GraphData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   
   useEffect(() => {
     fetchGraphData().catch(error => {
@@ -63,17 +55,10 @@ export default function ClaimGraph({ claimId, height = 600 }: ClaimGraphProps) {
         throw new Error('Invalid graph data received');
       }
       
-      // Transform API response format (edges) to ClaimGraph format (links)
-      const transformedData = {
+      // Store the raw API data
+      const apiData = {
         nodes: graphData.nodes || [],
-        links: (graphData.edges || []).map((edge: { id: string; source: string; target: string; type: string; weight?: number; evidence?: string }) => ({
-          id: edge.id,
-          source: edge.source,
-          target: edge.target,
-          type: edge.type,
-          strength: edge.weight || 0.5,
-          evidence: edge.evidence || undefined
-        })),
+        edges: graphData.edges || [],
         metadata: graphData.metadata || {
           total_claims: 0,
           total_relationships: 0,
@@ -81,170 +66,53 @@ export default function ClaimGraph({ claimId, height = 600 }: ClaimGraphProps) {
         }
       };
       
-      setData(transformedData);
+      setData(apiData);
+      
+      // Transform to Graph2D format
+      const graph2DData: GraphData = {
+        nodes: (graphData.nodes || []).map((node: any) => ({
+          ...node,
+          label: node.text || node.title || node.label,
+          size: 15,
+          color: claimId && node.id === claimId ? '#8b5cf6' : '#3B82F6'
+        })),
+        edges: (graphData.edges || []).map((edge: any) => ({
+          ...edge,
+          color: edge.type === 'supports' ? '#22c55e' : 
+                 edge.type === 'contradicts' ? '#ef4444' : 
+                 edge.type === 'extends' ? '#3b82f6' : 
+                 edge.type === 'contextualizes' ? '#f59e0b' : '#6b7280'
+        })),
+        clusters: []
+      };
+      
+      setGraphData(graph2DData);
     } catch (error) {
       console.error('Error fetching graph data:', error);
       // Set empty data to prevent rendering issues
       setData({
         nodes: [],
-        links: [], // Correct for ClaimGraph's local GraphData interface
+        edges: [],
         metadata: {
           total_claims: 0,
           total_relationships: 0,
           relationship_types: []
         }
       });
+      setGraphData({
+        nodes: [],
+        edges: [],
+        clusters: []
+      });
     } finally {
       setLoading(false);
     }
   };
   
-  useEffect(() => {
-    if (!data || !svgRef.current) return;
-    
-    // Defensive checks to prevent iterator errors
-    if (!Array.isArray(data.nodes) || !Array.isArray(data.links)) {
-      console.warn('ClaimGraph: Invalid data structure', { data });
-      return;
-    }
-    
-    try {
-      const svg = d3.select(svgRef.current);
-      svg.selectAll("*").remove(); // Clear previous content
-      
-      const width = 800;
-      const containerHeight = height;
-      
-      // Create simulation with additional safety checks
-      if (data.nodes.length === 0) {
-        console.warn('ClaimGraph: No nodes to render');
-        return;
-      }
-      
-      const simulation = d3.forceSimulation(data.nodes)
-        .force("link", d3.forceLink<GraphNode, GraphLink>(data.links).id(d => d.id).distance(100))
-        .force("charge", d3.forceManyBody().strength(-300))
-        .force("center", d3.forceCenter(width / 2, containerHeight / 2))
-        .force("collision", d3.forceCollide<GraphNode>().radius(d => d.size + 5));
-    
-    // Create arrow markers for directed edges
-    svg.append("defs").selectAll("marker")
-      .data(["supports", "contradicts", "extends", "contextualizes"])
-      .enter().append("marker")
-      .attr("id", d => `arrow-${d}`)
-      .attr("viewBox", "0 -5 10 10")
-      .attr("refX", 15)
-      .attr("refY", 0)
-      .attr("markerWidth", 6)
-      .attr("markerHeight", 6)
-      .attr("orient", "auto")
-      .append("path")
-      .attr("d", "M0,-5L10,0L0,5")
-      .attr("fill", d => {
-        const colors: Record<string, string> = {
-          'supports': '#22c55e',
-          'contradicts': '#ef4444',
-          'extends': '#3b82f6',
-          'contextualizes': '#f59e0b'
-        };
-        return colors[d] || '#6b7280';
-      });
-    
-    // Create links
-    const link = svg.append("g")
-      .selectAll("line")
-      .data(data.links)
-      .enter().append("line")
-      .attr("stroke", d => {
-        const colors: Record<string, string> = {
-          'supports': '#22c55e',
-          'contradicts': '#ef4444',
-          'extends': '#3b82f6',
-          'contextualizes': '#f59e0b'
-        };
-        return colors[d.type] || '#6b7280';
-      })
-      .attr("stroke-width", d => Math.max(1, d.strength * 4))
-      .attr("stroke-opacity", 0.6)
-      .attr("marker-end", d => `url(#arrow-${d.type})`);
-    
-    // Create node groups
-    const node = svg.append("g")
-      .selectAll("g")
-      .data(data.nodes)
-      .enter().append("g")
-      .attr("cursor", "pointer")
-      .call(d3.drag<SVGGElement, GraphNode>()
-        .on("start", dragstarted)
-        .on("drag", dragged)
-        .on("end", dragended))
-      .on("click", (event, d) => {
-        setSelectedNode(d);
-      });
-    
-    // Add circles for nodes
-    node.append("circle")
-      .attr("r", d => d.size)
-      .attr("fill", d => {
-        if (claimId && d.id === claimId) return '#8b5cf6'; // Purple for current claim
-        const score = d.consensus;
-        if (score > 0.7) return '#22c55e'; // Green for high consensus
-        if (score > 0.3) return '#f59e0b'; // Yellow for medium consensus
-        return '#ef4444'; // Red for low consensus
-      })
-      .attr("stroke", "#fff")
-      .attr("stroke-width", 2);
-    
-    // Add labels
-    node.append("text")
-      .text(d => d.text.substring(0, 30) + (d.text.length > 30 ? '...' : ''))
-      .attr("dy", d => d.size + 15)
-      .attr("text-anchor", "middle")
-      .attr("font-size", "12px")
-      .attr("fill", "#374151");
-    
-    // Add consensus percentage
-    node.append("text")
-      .text(d => `${Math.round(d.consensus * 100)}%`)
-      .attr("dy", 4)
-      .attr("text-anchor", "middle")
-      .attr("font-size", "10px")
-      .attr("font-weight", "bold")
-      .attr("fill", "white");
-    
-    // Update positions on simulation tick
-    simulation.on("tick", () => {
-      link
-        .attr("x1", (d: GraphLink) => (d.source as GraphNode).x || 0)
-        .attr("y1", (d: GraphLink) => (d.source as GraphNode).y || 0)
-        .attr("x2", (d: GraphLink) => (d.target as GraphNode).x || 0)
-        .attr("y2", (d: GraphLink) => (d.target as GraphNode).y || 0);
-      
-      node.attr("transform", (d: GraphNode) => `translate(${d.x || 0},${d.y || 0})`);
-    });
-    
-    function dragstarted(event: d3.D3DragEvent<SVGGElement, GraphNode, GraphNode>, d: GraphNode) {
-      if (!event.active) simulation.alphaTarget(0.3).restart();
-      d.fx = d.x;
-      d.fy = d.y;
-    }
-    
-    function dragged(event: d3.D3DragEvent<SVGGElement, GraphNode, GraphNode>, d: GraphNode) {
-      d.fx = event.x;
-      d.fy = event.y;
-    }
-    
-    function dragended(event: d3.D3DragEvent<SVGGElement, GraphNode, GraphNode>, d: GraphNode) {
-      if (!event.active) simulation.alphaTarget(0);
-      d.fx = null;
-      d.fy = null;
-    }
-    
-    } catch (error) {
-      console.error('ClaimGraph: Error rendering D3 visualization', error);
-    }
-    
-  }, [data, height, claimId]);
+  // Handle node selection from the graph
+  const handleNodeSelect = (nodeId: string | null, node: Node | null) => {
+    setSelectedNode(node);
+  };
   
   if (loading) {
     return (
@@ -302,29 +170,34 @@ export default function ClaimGraph({ claimId, height = 600 }: ClaimGraphProps) {
             <Badge style={{ backgroundColor: '#f59e0b' }}>Contextualizes</Badge>
           </div>
           
-          <div className="border rounded-lg overflow-hidden">
-            <svg
-              ref={svgRef}
-              width="800"
-              height={height}
-              className="w-full"
-            />
+          <div className="border rounded-lg overflow-hidden" style={{ height: `${height}px` }}>
+            {graphData && (
+              <Graph2DWrapper
+                data={graphData}
+                selectedNodeId={claimId || null}
+                onNodeSelect={handleNodeSelect}
+              />
+            )}
           </div>
           
           {selectedNode && (
             <div className="mt-4 p-4 border rounded-lg bg-slate-50">
               <h4 className="font-semibold mb-2">Selected Claim</h4>
-              <p className="text-sm mb-2">{selectedNode.text}</p>
+              <p className="text-sm mb-2">{selectedNode.label || selectedNode.text || 'No description'}</p>
               <div className="flex gap-2">
-                <Badge variant="outline">
-                  Consensus: {Math.round(selectedNode.consensus * 100)}%
-                </Badge>
-                <a
-                  href={`/claim/${selectedNode.slug}`}
-                  className="text-blue-600 hover:underline text-sm"
-                >
-                  View Details →
-                </a>
+                {selectedNode.consensus && (
+                  <Badge variant="outline">
+                    Consensus: {Math.round(Number(selectedNode.consensus) * 100)}%
+                  </Badge>
+                )}
+                {selectedNode.slug && (
+                  <a
+                    href={`/claim/${selectedNode.slug}`}
+                    className="text-blue-600 hover:underline text-sm"
+                  >
+                    View Details →
+                  </a>
+                )}
               </div>
             </div>
           )}

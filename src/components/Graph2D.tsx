@@ -1,9 +1,11 @@
 // Graph2D.tsx - 2D graph visualization using React-Sigma
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { SigmaContainer, useLoadGraph, useRegisterEvents, useSigma } from '@react-sigma/core';
 import '@react-sigma/core/lib/style.css';
 import Graph from 'graphology';
+import forceAtlas2 from 'graphology-layout-forceatlas2';
+import { Coordinates } from 'sigma/types';
 import type { GraphData, Node } from '@/lib/types';
 
 interface Graph2DProps {
@@ -16,27 +18,76 @@ function GraphEvents({ onNodeSelect }: { onNodeSelect: (nodeId: string | null, n
   const sigma = useSigma();
   const graph = sigma.getGraph();
   const registerEvents = useRegisterEvents();
+  const draggedNode = useRef<string | null>(null);
+  const isDragging = useRef(false);
 
   useEffect(() => {
     registerEvents({
       clickNode: (event) => {
         try {
-          const nodeId = event.node;
-          const nodeData = graph.getNodeAttributes(nodeId);
-          onNodeSelect(nodeId, nodeData as Node);
+          // Only trigger click if we weren't dragging
+          if (!isDragging.current) {
+            const nodeId = event.node;
+            const nodeData = graph.getNodeAttributes(nodeId);
+            onNodeSelect(nodeId, nodeData as Node);
+          }
         } catch (error) {
           console.error('Graph2D: Error handling node click', error);
         }
       },
       clickStage: () => {
         try {
-          onNodeSelect(null, null);
+          if (!isDragging.current) {
+            onNodeSelect(null, null);
+          }
         } catch (error) {
           console.error('Graph2D: Error handling stage click', error);
         }
       },
+      downNode: (event) => {
+        try {
+          draggedNode.current = event.node;
+          isDragging.current = false;
+        } catch (error) {
+          console.error('Graph2D: Error handling node down', error);
+        }
+      },
+      mousemovebody: (event) => {
+        try {
+          if (!draggedNode.current) return;
+          
+          isDragging.current = true;
+          
+          // Get the drag position in graph coordinates
+          const position = sigma.viewportToGraph(event);
+          
+          // Update node position
+          graph.setNodeAttribute(draggedNode.current, 'x', position.x);
+          graph.setNodeAttribute(draggedNode.current, 'y', position.y);
+          
+          // Prevent the default camera move
+          event.preventSigmaDefault();
+          event.original.preventDefault();
+          event.original.stopPropagation();
+        } catch (error) {
+          console.error('Graph2D: Error handling drag', error);
+        }
+      },
+      mouseup: () => {
+        try {
+          if (draggedNode.current) {
+            // Small delay to prevent click event after drag
+            setTimeout(() => {
+              isDragging.current = false;
+            }, 100);
+            draggedNode.current = null;
+          }
+        } catch (error) {
+          console.error('Graph2D: Error handling mouse up', error);
+        }
+      },
     });
-  }, [registerEvents, graph, onNodeSelect]);
+  }, [registerEvents, graph, onNodeSelect, sigma]);
 
   return null;
 }
@@ -112,6 +163,24 @@ function GraphLoader({ data, selectedNodeId }: { data: GraphData; selectedNodeId
     });
 
     loadGraph(graph);
+    
+    // Apply force layout for better node positioning
+    if (graph.order > 0) {
+      try {
+        // Apply ForceAtlas2 layout for physics simulation
+        forceAtlas2.assign(graph, {
+          iterations: 50,
+          settings: {
+            gravity: 1,
+            scalingRatio: 10,
+            strongGravityMode: true,
+            barnesHutOptimize: false,
+          }
+        });
+      } catch (error) {
+        console.error('Graph2D: Error applying force layout', error);
+      }
+    }
     
     // Fit graph to viewport after loading
     setTimeout(() => {
@@ -189,12 +258,27 @@ export function Graph2D({ data, selectedNodeId, onNodeSelect }: Graph2DProps) {
     labelWeight: 'bold',
     labelColor: { color: '#374151' },
     defaultNodeType: 'circle',
+    defaultEdgeType: 'straight',
+    renderEdgeLabels: false,
     // Allow invalid container to prevent initialization errors
     allowInvalidContainer: true,
-    // Removed defaultEdgeType as it was causing issues
-    edgeReducer: (edge: string, data: { color: string; [key: string]: unknown }) => {
-      // Reduce edge opacity for better visibility
-      return { ...data, color: data.color + '80' };
+    // Force layout settings for physics
+    enableEdgeHoverEvent: true,
+    enableEdgeClickEvent: true,
+    nodeReducer: (node: string, data: any) => {
+      return { ...data, zIndex: data.highlighted ? 2 : 1 };
+    },
+    edgeReducer: (edge: string, data: { color: string; hidden?: boolean; [key: string]: unknown }) => {
+      if (data.hidden) {
+        return { ...data, color: 'transparent' };
+      }
+      // Make edges more visible
+      return { 
+        ...data, 
+        color: data.color,
+        size: Math.max(1, (data.size || 1)),
+        zIndex: 1
+      };
     },
     zIndex: true,
     minCameraRatio: 0.1,
