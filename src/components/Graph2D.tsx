@@ -137,8 +137,6 @@ function GraphLoader({ data, selectedNodeId }: { data: GraphData; selectedNodeId
         label: node.label,
         // Store semantic type under a different property name
         nodeType: semanticType,
-        // Explicitly set Sigma.js type to circle (default node renderer)
-        type: 'circle',
       });
     });
 
@@ -257,7 +255,6 @@ export function Graph2D({ data, selectedNodeId, onNodeSelect }: Graph2DProps) {
     labelWeight: 'bold',
     labelColor: { color: '#374151' },
     defaultNodeType: 'circle',
-    defaultEdgeType: 'straight',
     renderEdgeLabels: false,
     // Allow invalid container to prevent initialization errors
     allowInvalidContainer: true,
